@@ -38,6 +38,8 @@ Notely supports 17 markdown features:
 
 ## Installation
 
+### Local Development
+
 1. Clone the repository
 2. Install dependencies:
 ```bash
@@ -50,6 +52,18 @@ python3.13 main.py
 ```
 
 4. Open your browser to `http://localhost:4782`
+
+### Docker Compose
+
+1. Clone the repository
+2. Run with Docker Compose:
+```bash
+docker-compose up
+```
+
+3. Open your browser to `http://localhost:4782`
+
+The application will automatically create the SQLite database and upload directory on first run. Data persists in the `data/` volume.
 
 ## Tech Stack
 

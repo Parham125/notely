@@ -3,7 +3,7 @@ from datetime import datetime
 from waitress import serve
 import os
 from config import create_app
-from database import close_db,init_db
+from database import init_db
 from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture
 from blog_ops import get_recent_blogs,create_blog,get_blog,update_blog,delete_blog,get_user_blogs,search_blogs,get_user_by_username
 from comment_ops import create_comment,delete_comment,get_blog_comments,build_comment_tree
@@ -12,7 +12,6 @@ from markdown_parser import render_markdown
 from avatar_generator import get_avatar_url
 
 app=create_app()
-app.teardown_appcontext(close_db)
 
 if not os.path.exists("data/notely.db"):
     init_db()
