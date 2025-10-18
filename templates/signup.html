@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sign Up - Notely{% endblock %}
+{% block content %}
+<div class="auth-container">
+<h1>Sign Up</h1>
+{% if error %}
+<div class="error">{{error}}</div>
+{% endif %}
+<form method="POST">
+<div class="form-group">
+<label for="username">Username</label>
+<input type="text" id="username" name="username" required>
+</div>
+<div class="form-group">
+<label for="display_name">Display Name</label>
+<input type="text" id="display_name" name="display_name" required>
+</div>
+<div class="form-group">
+<label for="password">Password</label>
+<input type="password" id="password" name="password" required>
+</div>
+<button type="submit" class="btn">Sign Up</button>
+</form>
+<p style="margin-top:20px;text-align:center;">Already have an account? <a href="/signin">Sign In</a></p>
+</div>
+{% endblock %}

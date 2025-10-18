@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Settings - Notely{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+{% if success %}
+<div class="success">{{success}}</div>
+{% endif %}
+{% if error %}
+<div class="error">{{error}}</div>
+{% endif %}
+<div class="tabs">
+<button class="tab active" data-tab="profile">Profile</button>
+<button class="tab" data-tab="sessions">Sessions</button>
+</div>
+<div id="profile" class="tab-content">
+<h2>Profile Settings</h2>
+<div style="margin-bottom:30px;">
+<h3>Display Name</h3>
+<form method="POST" action="/settings/display-name">
+<div class="form-group">
+<label for="display_name">Display Name</label>
+<input type="text" id="display_name" name="display_name" value="{{user.display_name}}" required>
+</div>
+<button type="submit" class="btn">Update Display Name</button>
+</form>
+</div>
+<div style="margin-bottom:30px;">
+<h3>Profile Picture</h3>
+<div style="margin-bottom:20px;">
+<img src="{{user|avatar}}" alt="{{user.display_name}}" class="profile-picture">
+</div>
+<form method="POST" action="/settings/profile-picture" enctype="multipart/form-data">
+<div class="form-group">
+<label for="file">Upload New Picture</label>
+<input type="file" id="file" name="file" accept="image/*">
+</div>
+<button type="submit" class="btn">Update Picture</button>
+</form>
+</div>
+</div>
+<div id="sessions" class="tab-content" style="display:none;">
+<h2>Active Sessions</h2>
+{% if sessions %}
+{% for session in sessions %}
+<div class="blog-card" style="display:flex;justify-content:space-between;align-items:center;">
+<div>
+<div style="font-weight:600;">{{session.browser or "Unknown Browser"}} - {{session.device or "Unknown Device"}}</div>
+<div class="blog-meta">
+Created: {{session.created_at|timestampformat}} • Last Active: {{session.last_active|timestampformat}}
+{% if session.token==current_token %}<span style="color:var(--success);font-weight:600;"> (Current Session)</span>{% endif %}
+</div>
+</div>
+{% if session.token!=current_token %}
+<button onclick="deleteSession('{{session.token}}')" class="btn btn-small btn-danger">Delete</button>
+{% endif %}
+</div>
+{% endfor %}
+{% else %}
+<p>No active sessions.</p>
+{% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll(".tab").forEach(tab=>{
+tab.addEventListener("click",()=>{
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+document.querySelectorAll(".tab-content").forEach(c=>c.style.display="none");
+tab.classList.add("active");
+document.getElementById(tab.dataset.tab).style.display="block";
+});
+});
+</script>
+{% endblock %}

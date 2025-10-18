@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{profile_user.display_name}} - Notely{% endblock %}
+{% block content %}
+<div class="profile-header">
+<img src="{{profile_user|avatar}}" alt="{{profile_user.display_name}}" class="profile-picture">
+<div class="profile-info">
+<h1>{{profile_user.display_name}}</h1>
+<p>@{{profile_user.username}}</p>
+<p>Member since {{profile_user.created_at|datetimeformat}}</p>
+</div>
+</div>
+{% if is_own_profile %}
+<div class="tabs">
+<button class="tab active" data-tab="published">Published</button>
+<button class="tab" data-tab="drafts">Drafts</button>
+</div>
+<div id="published" class="tab-content">
+{% if blogs|selectattr("is_draft","equalto",0)|list %}
+{% for blog in blogs %}
+{% if not blog.is_draft %}
+<div class="blog-card">
+<div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a></div>
+<div class="blog-meta">Updated: {{blog.updated_at|datetimeformat}}</div>
+</div>
+{% endif %}
+{% endfor %}
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/profile/{{profile_user.username}}?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
+<a href="/profile/{{profile_user.username}}?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
+</div>
+{% else %}
+<p>No published blogs yet.</p>
+{% endif %}
+</div>
+<div id="drafts" class="tab-content" style="display:none;">
+{% if blogs|selectattr("is_draft","equalto",1)|list %}
+{% for blog in blogs %}
+{% if blog.is_draft %}
+<div class="blog-card">
+<div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a><span class="draft-badge">Draft</span></div>
+<div class="blog-meta">Updated: {{blog.updated_at|datetimeformat}}</div>
+</div>
+{% endif %}
+{% endfor %}
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/profile/{{profile_user.username}}?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
+<a href="/profile/{{profile_user.username}}?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
+</div>
+{% else %}
+<p>No drafts yet.</p>
+{% endif %}
+</div>
+{% else %}
+<h2>Published Blogs</h2>
+{% if blogs %}
+{% for blog in blogs %}
+<div class="blog-card">
+<div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a></div>
+<div class="blog-meta">{{blog.created_at|datetimeformat}}</div>
+</div>
+{% endfor %}
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/profile/{{profile_user.username}}?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
+<a href="/profile/{{profile_user.username}}?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
+</div>
+{% else %}
+<p>No published blogs yet.</p>
+{% endif %}
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if is_own_profile %}
+<script>
+document.querySelectorAll(".tab").forEach(tab=>{
+tab.addEventListener("click",()=>{
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+document.querySelectorAll(".tab-content").forEach(c=>c.style.display="none");
+tab.classList.add("active");
+document.getElementById(tab.dataset.tab).style.display="block";
+});
+});
+</script>
+{% endif %}
+{% endblock %}

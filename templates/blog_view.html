@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{blog.title}} - Notely{% endblock %}
+{% block content %}
+<article>
+<h1>{{blog.title}}{% if blog.is_draft %}<span class="draft-badge">Draft</span>{% endif %}</h1>
+<div class="blog-meta" style="margin-bottom:30px;">
+<img src="{{blog|avatar}}" alt="{{blog.display_name}}" class="profile-picture" style="width:40px;height:40px;vertical-align:middle;margin-right:10px;">
+<span><a href="/profile/{{blog.username}}">{{blog.display_name}} (@{{blog.username}})</a></span> • <span>{{blog.created_at|datetimeformat}}</span>
+{% if user and user.id==blog.user_id %}
+<a href="/blog/{{blog.id}}/edit" class="btn btn-small btn-secondary" style="margin-left:15px;">Edit</a>
+<button onclick="deleteBlog({{blog.id}})" class="btn btn-small btn-danger">Delete</button>
+{% endif %}
+</div>
+<div class="blog-content">{{blog.content_html|safe}}</div>
+</article>
+<div class="comments-section">
+<h2>Comments</h2>
+{% if comments %}
+{% macro render_comment(comment) %}
+<div class="comment{% if comment.parent_id %} comment-reply{% endif %}" id="comment-{{comment.id}}">
+<div class="comment-author">
+<img src="{{comment|avatar}}" alt="{{comment.display_name}}" class="profile-picture" style="width:25px;height:25px;vertical-align:middle;margin-right:6px;">
+<a href="/profile/{{comment.username}}">{{comment.display_name}}</a>
+</div>
+<div class="comment-meta">{{comment.created_at|datetimeformat}}</div>
+<div class="comment-content">{{comment.content}}</div>
+<div class="comment-actions">
+<button class="btn btn-small btn-secondary reply-btn" data-comment-id="{{comment.id}}">Reply</button>
+{% if user and user.id==comment.user_id %}
+<button onclick="deleteComment({{comment.id}})" class="btn btn-small btn-danger">Delete</button>
+{% endif %}
+</div>
+<div class="reply-form" id="reply-form-{{comment.id}}" style="display:none;margin-top:15px;">
+<form method="POST" action="/blog/{{blog.id}}/comment">
+<input type="hidden" name="parent_id" value="{{comment.id}}">
+<textarea name="content" placeholder="Write a reply..." required style="min-height:80px;"></textarea>
+<button type="submit" class="btn btn-small" style="margin-top:10px;">Submit Reply</button>
+<button type="button" class="btn btn-small btn-secondary cancel-reply" data-comment-id="{{comment.id}}" style="margin-left:5px;">Cancel</button>
+</form>
+</div>
+{% if comment.replies %}
+{% for reply in comment.replies %}
+{{render_comment(reply)}}
+{% endfor %}
+{% endif %}
+</div>
+{% endmacro %}
+{% for comment in comments %}
+{{render_comment(comment)}}
+{% endfor %}
+{% else %}
+<p>No comments yet. Be the first to comment!</p>
+{% endif %}
+{% if user %}
+<div style="margin-top:30px;">
+<h3>Add a Comment</h3>
+<form method="POST" action="/blog/{{blog.id}}/comment">
+<textarea name="content" placeholder="Write your comment..." required></textarea>
+<button type="submit" class="btn" style="margin-top:10px;">Submit Comment</button>
+</form>
+</div>
+{% else %}
+<p style="margin-top:30px;"><a href="/signin">Sign in</a> to comment.</p>
+{% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll(".reply-btn").forEach(btn=>{
+btn.addEventListener("click",()=>{
+const commentId=btn.dataset.commentId;
+document.getElementById("reply-form-"+commentId).style.display="block";
+btn.style.display="none";
+});
+});
+document.querySelectorAll(".cancel-reply").forEach(btn=>{
+btn.addEventListener("click",()=>{
+const commentId=btn.dataset.commentId;
+document.getElementById("reply-form-"+commentId).style.display="none";
+document.querySelector(`.reply-btn[data-comment-id="${commentId}"]`).style.display="inline-block";
+});
+});
+</script>
+{% endblock %}

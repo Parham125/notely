@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Search - Notely{% endblock %}
+{% block content %}
+<div class="search-container">
+<h1>Search Blogs</h1>
+<form method="GET">
+<input type="text" name="q" class="search-input" placeholder="Search blogs..." value="{{query or ''}}" autofocus>
+<button type="submit" class="btn" style="margin-top:15px;width:100%;">Search</button>
+</form>
+</div>
+{% if query %}
+<div style="margin-top:40px;">
+<h2>Search Results for "{{query}}"</h2>
+{% if blogs %}
+{% for blog in blogs %}
+<div class="blog-card">
+<div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a></div>
+<div class="blog-meta">
+<img src="{{blog|avatar}}" alt="{{blog.display_name}}" class="profile-picture" style="width:30px;height:30px;vertical-align:middle;margin-right:8px;">
+<span>{{blog.display_name}} (@{{blog.username}})</span> • <span>{{blog.created_at|datetimeformat}}</span>
+</div>
+</div>
+{% endfor %}
+{% else %}
+<p>No blogs found matching your search.</p>
+{% endif %}
+</div>
+{% endif %}
+{% endblock %}

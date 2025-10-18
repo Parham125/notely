@@ -1,0 +1,12 @@
+*.pyc
+__pycache__/
+*.db
+*.sqlite
+*.sqlite3
+notely.db
+static/uploads/profile_pictures/
+static/uploads/blog_images/
+venv/
+.env
+.DS_Store
+*.log

@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  notely:
+    build: .
+    ports:
+      - "4782:4782"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

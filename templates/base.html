@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{% block title %}Notely{% endblock %}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script>const t=localStorage.getItem("theme")||"light";document.documentElement.setAttribute("data-theme",t);</script>
+</head>
+<body>
+<header>
+<div class="container header-content">
+<a href="/" class="logo">Notely</a>
+<nav>
+{% if user %}
+<a href="/">Home</a>
+<a href="/search">Search</a>
+<a href="/blog/new">New Blog</a>
+<a href="/profile/{{user.username}}">Profile</a>
+<a href="/settings">Settings</a>
+<a href="/logout">Logout</a>
+{% else %}
+<a href="/">Home</a>
+<a href="/search">Search</a>
+<a href="/signin">Sign In</a>
+<a href="/signup">Sign Up</a>
+{% endif %}
+<button id="theme-toggle" class="theme-toggle">🌙</button>
+</nav>
+</div>
+</header>
+<main class="container">
+{% block content %}{% endblock %}
+</main>
+<footer>
+<div class="container">
+<p>Notely - Open Source Blog Platform</p>
+</div>
+</footer>
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/comments.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
