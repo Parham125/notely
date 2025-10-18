@@ -16,25 +16,24 @@ A self-hosted, open-source blog platform built with Flask that lets you create a
 
 ## Markdown Support
 
-Notely supports 17 markdown features:
+Notely supports 16 markdown features:
 
 1. Headings (H1-H6)
-2. Bold (`**text**` or `__text__`)
+2. Bold (`**text**`)
 3. Italic (`*text*`)
-4. Italic alternate (`_text_`)
+4. Underline (`__text__`)
 5. Blockquote (`> text`)
 6. Ordered lists
 7. Unordered lists
 8. Inline code
 9. Links
-10. Linked images
-11. Custom images
-12. Fenced code blocks with syntax highlighting
-13. Strikethrough (`~~text~~`)
-14. Task lists
-15. Highlight (`==text==`)
-16. Subscript (`~text~`)
-17. Superscript (`^text^`)
+10. Images
+11. Fenced code blocks with syntax highlighting
+12. Strikethrough (`~~text~~`)
+13. Task lists
+14. Highlight (`==text==`)
+15. Subscript (`~text~`)
+16. Superscript (`^text^`)
 
 ## Installation
 
@@ -80,7 +79,6 @@ The application will automatically create the SQLite database and upload directo
 - Password hashing with bcrypt
 - Session tracking with browser and device information
 - Chunked file upload validation
-- XSS prevention in markdown rendering
 - SQL injection prevention with parameterized queries
 
 ## License

@@ -32,20 +32,22 @@ def parse_inline_code(text):
     return re.sub(r"`([^`]+)`",lambda m: f"<code>{html_module.escape(m.group(1))}</code>",text)
 
 def parse_bold(text):
-    text=re.sub(r"\*\*(.+?)\*\*",r"<strong>\1</strong>",text)
-    text=re.sub(r"__(.+?)__",r"<strong>\1</strong>",text)
+    text=re.sub(r"\*\*(.+?)\*\*",r"<b>\1</b>",text)
     return text
 
 def parse_italic(text):
-    text=re.sub(r"(?<!\*)\*([^\*\n]+?)\*(?!\*)",r"<em>\1</em>",text)
-    text=re.sub(r"(?<![_\w])_([^_\n]+?)_(?![_\w])",r"<em>\1</em>",text)
+    text=re.sub(r"(?<!\*)\*([^\*\n]+?)\*(?!\*)",r"<i>\1</i>",text)
+    text=re.sub(r"(?<![_\w])_([^_\n]+?)_(?![_\w])",r"<i>\1</i>",text)
     return text
 
 def parse_strikethrough(text):
-    return re.sub(r"~~(.+?)~~",r"<del>\1</del>",text)
+    return re.sub(r"~~(.+?)~~",r"<s>\1</s>",text)
 
 def parse_highlight(text):
     return re.sub(r"==(.+?)==",r"<mark>\1</mark>",text)
+
+def parse_underline(text):
+    return re.sub(r"__(.+?)__",r"<u>\1</u>",text)
 
 def parse_subscript(text):
     return re.sub(r"~([^~\s]+?)~",r"<sub>\1</sub>",text)
@@ -66,6 +68,7 @@ def parse_inline_elements(text):
     text=parse_inline_code(text)
     text=parse_bold(text)
     text=parse_italic(text)
+    text=parse_underline(text)
     text=parse_strikethrough(text)
     text=parse_highlight(text)
     text=parse_subscript(text)
@@ -157,7 +160,18 @@ def parse_blockquotes(text):
     result=[]
     in_blockquote=False
     blockquote_content=[]
+    callout_type=None
     for line in lines:
+        match=re.match(r"^>\s*\[!(IMPORTANT|WARNING|NOTE|ERROR)\]\s*(.*)$",line)
+        if match:
+            if in_blockquote and callout_type!=match.group(1):
+                content="\n".join(blockquote_content)
+                result.append(f"<blockquote class=\"callout callout-{callout_type.lower()}\">{parse_inline_elements(content)}</blockquote>")
+                blockquote_content=[]
+            callout_type=match.group(1)
+            in_blockquote=True
+            blockquote_content.append(match.group(2))
+            continue
         match=re.match(r"^>\s*(.*)$",line)
         if match:
             if not in_blockquote:
@@ -166,13 +180,20 @@ def parse_blockquotes(text):
         else:
             if in_blockquote:
                 content="\n".join(blockquote_content)
-                result.append(f"<blockquote>{parse_inline_elements(content)}</blockquote>")
+                if callout_type:
+                    result.append(f"<blockquote class=\"callout callout-{callout_type.lower()}\">{parse_inline_elements(content)}</blockquote>")
+                else:
+                    result.append(f"<blockquote>{parse_inline_elements(content)}</blockquote>")
                 blockquote_content=[]
                 in_blockquote=False
+                callout_type=None
             result.append(line)
     if in_blockquote:
         content="\n".join(blockquote_content)
-        result.append(f"<blockquote>{parse_inline_elements(content)}</blockquote>")
+        if callout_type:
+            result.append(f"<blockquote class=\"callout callout-{callout_type.lower()}\">{parse_inline_elements(content)}</blockquote>")
+        else:
+            result.append(f"<blockquote>{parse_inline_elements(content)}</blockquote>")
     return "\n".join(result)
 
 def parse_paragraphs(text):

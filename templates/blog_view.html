@@ -27,7 +27,7 @@
 <div class="comment-actions">
 <button class="btn btn-small btn-secondary reply-btn" data-comment-id="{{comment.id}}">Reply</button>
 {% if user and user.id==comment.user_id %}
-<button onclick="deleteComment({{comment.id}})" class="btn btn-small btn-danger">Delete</button>
+<button class="btn btn-small btn-danger delete-comment-btn" data-comment-id="{{comment.id}}">Delete</button>
 {% endif %}
 </div>
 <div class="reply-form" id="reply-form-{{comment.id}}" style="display:none;margin-top:15px;">
@@ -78,6 +78,11 @@ btn.addEventListener("click",()=>{
 const commentId=btn.dataset.commentId;
 document.getElementById("reply-form-"+commentId).style.display="none";
 document.querySelector(`.reply-btn[data-comment-id="${commentId}"]`).style.display="inline-block";
+});
+});
+document.querySelectorAll(".delete-comment-btn").forEach(btn=>{
+btn.addEventListener("click",()=>{
+deleteComment(btn.getAttribute("data-comment-id"));
 });
 });
 </script>

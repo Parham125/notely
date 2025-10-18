@@ -6,14 +6,22 @@ form.innerHTML=`<textarea name="content" placeholder="Write a reply..." required
 document.querySelector(`[data-comment-id="${commentId}"]`).appendChild(form);
 }
 function deleteComment(commentId){
+commentId=String(commentId).trim();
+if(!commentId){
+alert("Invalid comment ID");
+return;
+}
 if(confirm("Are you sure you want to delete this comment?")){
-fetch(`/comment/${commentId}/delete`,{method:"POST"}).then(r=>r.json()).then(data=>{
+fetch(`/comment/${commentId}/delete`,{method:"POST",headers:{"Content-Type":"application/json"}}).then(r=>r.json()).then(data=>{
 if(data.success){
 location.reload();
 }else{
 alert(data.error||"Failed to delete comment");
 }
-}).catch(()=>alert("Failed to delete comment"));
+}).catch(err=>{
+console.error("Delete error:",err);
+alert("Failed to delete comment");
+});
 }
 }
 function deleteBlog(blogId){

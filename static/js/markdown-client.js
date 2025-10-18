@@ -7,26 +7,65 @@ const html=`<pre><code class="language-${(lang||"").replace(/[<>"]/g,"")}${code.
 codeBlocks.push(html);
 return`___CODE_BLOCK_${codeBlocks.length-1}___`;
 });
-text=text.split("\n").map(line=>{
+const lines=text.split("\n");
+let result=[];
+let inQuote=false;
+let quoteContent=[];
+let calloutType=null;
+for(let i=0;i<lines.length;i++){
+const line=lines[i];
+const calloutMatch=line.match(/^>\s*\[!(IMPORTANT|WARNING|NOTE|ERROR)\]\s*(.*)$/);
+if(calloutMatch){
+if(inQuote&&calloutType!==calloutMatch[1]){
+result.push(`<blockquote class="callout callout-${calloutType.toLowerCase()}">${quoteContent.map(c=>renderInline(c)).join(" ")}</blockquote>`);
+quoteContent=[];
+}
+calloutType=calloutMatch[1];
+inQuote=true;
+quoteContent.push(calloutMatch[2]);
+continue;
+}
+const quoteMatch=line.match(/^>\s*(.*)$/);
+if(quoteMatch){
+if(!inQuote)inQuote=true;
+quoteContent.push(quoteMatch[1]);
+continue;
+}
+if(inQuote){
+result.push(`<blockquote${calloutType?` class="callout callout-${calloutType.toLowerCase()}"`:""}>${quoteContent.map(c=>renderInline(c)).join(" ")}</blockquote>`);
+quoteContent=[];
+inQuote=false;
+calloutType=null;
+}
 const heading=line.match(/^(#{1,6})\s+(.+)$/);
 if(heading){
-const level=heading[1].length;
-return`<h${level}>${renderInline(heading[2])}</h${level}>`;
+result.push(`<h${heading[1].length}>${renderInline(heading[2])}</h${heading[1].length}>`);
+continue;
 }
 const task=line.match(/^[-*+]\s+\[([ xX])\]\s+(.+)$/);
 if(task){
 const checked=task[1].toLowerCase()==="x"?"checked":"";
-return`<li><input type="checkbox" ${checked} disabled>${renderInline(task[2])}</li>`;
+result.push(`<li><input type="checkbox" ${checked} disabled>${renderInline(task[2])}</li>`);
+continue;
 }
 const list=line.match(/^[-*+]\s+(.+)$/);
-if(list)return`<li>${renderInline(list[1])}</li>`;
+if(list){
+result.push(`<li>${renderInline(list[1])}</li>`);
+continue;
+}
 const ordered=line.match(/^\d+\.\s+(.+)$/);
-if(ordered)return`<li>${renderInline(ordered[1])}</li>`;
-const quote=line.match(/^>\s*(.*)$/);
-if(quote)return`<blockquote>${renderInline(quote[1])}</blockquote>`;
-if(line.trim())return`<p>${renderInline(line)}</p>`;
-return"";
-}).join("\n");
+if(ordered){
+result.push(`<li>${renderInline(ordered[1])}</li>`);
+continue;
+}
+if(line.trim()){
+result.push(`<p>${renderInline(line)}</p>`);
+}
+}
+if(inQuote){
+result.push(`<blockquote${calloutType?` class="callout callout-${calloutType.toLowerCase()}"`:""}>${quoteContent.map(c=>renderInline(c)).join(" ")}</blockquote>`);
+}
+text=result.join("\n");
 for(let i=0;i<codeBlocks.length;i++){
 text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 }
@@ -37,11 +76,10 @@ return text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/&(?!lt;|gt;|amp;)
 }
 function renderInline(text){
 text=text.replace(/`([^`]+)`/g,"<code>$1</code>");
-text=text.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
-text=text.replace(/__(.+?)__/g,"<strong>$1</strong>");
-text=text.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g,"<em>$1</em>");
-text=text.replace(/(?<!_)_([^_\n]+?)_(?!_)/g,"<em>$1</em>");
-text=text.replace(/~~(.+?)~~/g,"<del>$1</del>");
+text=text.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+text=text.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g,"<i>$1</i>");
+text=text.replace(/(?<!_)_([^_\n]+?)_(?!_)/g,"<u>$1</u>");
+text=text.replace(/~~(.+?)~~/g,"<s>$1</s>");
 text=text.replace(/==(.+?)==/g,"<mark>$1</mark>");
 text=text.replace(/~([^\s~]+?)~/g,"<sub>$1</sub>");
 text=text.replace(/\^([^\s\^]+?)\^/g,"<sup>$1</sup>");
