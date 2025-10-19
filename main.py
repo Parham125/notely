@@ -334,5 +334,9 @@ def upload_blog_image():
     except Exception as e:
         return jsonify({"success":False,"error":"Invalid image file"}),400
 
+@app.route("/health")
+def health_check():
+    return "OK",200
+
 if __name__=="__main__":
     serve(app,host="0.0.0.0",port=4782,threads=32)
