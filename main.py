@@ -36,9 +36,9 @@ def apply_ip_rate_limits():
         return render_template("error.html",user=user,error="Too many requests. Please try again later."),429
     return None
 
-@app.route("/uploads/<filename>")
-def serve_upload(filename):
-    return send_from_directory("data/uploads",filename)
+@app.route("/uploads/<path:file>")
+def serve_upload(file):
+    return send_from_directory("data/uploads",file)
 
 @app.template_filter("timestampformat")
 def timestampformat_filter(value,format="%B %d, %Y at %I:%M %p"):
@@ -59,10 +59,6 @@ def home():
     user=get_current_user(request)
     blogs=get_recent_blogs()
     return render_template("home.html",user=user,blogs=blogs)
-
-@app.route("/uploads/<path:file>")
-def serve_upload(file):
-    return send_from_directory("data/uploads",file)
 
 @app.route("/signup",methods=["GET"])
 def signup_page():
