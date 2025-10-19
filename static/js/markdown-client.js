@@ -115,70 +115,7 @@ text=result.join("\n");
 for(let i=0;i<codeBlocks.length;i++){
 text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 }
-return text;
-}
-function sanitizeHtmlAttributes(attrs){
-return attrs.replace(/on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi,'').replace(/style\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi,'');
-}
-function escapeRemainingHtml(text){
-const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
-const allowedAttrs={a:['href','target'],img:['src','alt']};
-let result='';
-let pos=0;
-const tagRegex=/<(\/?)([\w]+)([^>]*)>/g;
-let match;
-while((match=tagRegex.exec(text))!==null){
-result+=text.substring(pos,match.index).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-if(allowedTags.includes(match[2].toLowerCase())){
-const tagName=match[2].toLowerCase();
-const isClosing=match[1]==='/';
-let attrs=match[3];
-if(!isClosing&&attrs){
-attrs=sanitizeHtmlAttributes(attrs);
-if(allowedAttrs[tagName]){
-const attrRegex=/(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*))/g;
-let attrMatch;
-let sanitizedAttrs='';
-while((attrMatch=attrRegex.exec(attrs))!==null){
-const attrName=attrMatch[1].toLowerCase();
-if(allowedAttrs[tagName].includes(attrName)){
-let attrValue=attrMatch[2]||attrMatch[3]||attrMatch[4]||'';
-if(attrName==='href'||attrName==='src'){
-attrValue=sanitizeUrl(attrValue);
-}
-if(attrValue){
-sanitizedAttrs+=` ${attrName}="${attrValue.replace(/"/g,'&quot;')}"`;
-}
-}
-}
-attrs=sanitizedAttrs;
-}
-}
-result+=`<${match[1]}${tagName}${attrs}>`;
-}else{
-result+=match[0].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-pos=tagRegex.lastIndex;
-}
-result+=text.substring(pos).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-return result;
-}
-function sanitizeUrl(url){
-let decoded=url.replace(/&#x?[0-9a-f]+;?/gi,m=>{
-const code=m.startsWith('&#x')?parseInt(m.slice(3,-1)||m.slice(3),16):parseInt(m.slice(2,-1)||m.slice(2),10);
-return String.fromCharCode(code);
-});
-decoded=decoded.replace(/&colon;/gi,':').replace(/&sol;/gi,'/').replace(/&slash;/gi,'/').replace(/&hyphen;/gi,'-').replace(/&dash;/gi,'-');
-decoded=decoded.replace(/%[0-9a-f]{2}/gi,m=>String.fromCharCode(parseInt(m.slice(1),16)));
-let normalized=decoded.replace(/[\s\n\r\t\x00-\x1f/\\]/g,'').toLowerCase();
-normalized=normalized.replace(/\/+/g,'/').replace(/\\+/g,'\\');
-const dangerousProtocols=/^(javascript|data|vbscript|file|about|blob|filesystem):/;
-if(dangerousProtocols.test(normalized))return"";
-if(normalized.startsWith('/'))return"";
-return url;
-}
-function sanitizeAttribute(str){
-return str.replace(/on\w+\s*=/gi,'').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+return DOMPurify.sanitize(text,{ALLOWED_TAGS:['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr','input','div'],ALLOWED_ATTR:['href','src','alt','class','type','checked','disabled'],ALLOW_DATA_ATTR:false});
 }
 function renderInline(text){
 text=text.replace(/`([^`]+)`/g,(m,code)=>`<code>${code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code>`);
@@ -189,9 +126,8 @@ text=text.replace(/~~(.+?)~~/g,"<s>$1</s>");
 text=text.replace(/==(.+?)==/g,"<mark>$1</mark>");
 text=text.replace(/~([^\s~]+?)~/g,"<sub>$1</sub>");
 text=text.replace(/\^([^\s\^]+?)\^/g,"<sup>$1</sup>");
-text=text.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g,(m,alt,src,href)=>`<a href="${sanitizeUrl(href).replace(/"/g,'&quot;')}"><img src="${sanitizeUrl(src).replace(/"/g,'&quot;')}" alt="${sanitizeAttribute(alt)}"></a>`);
-text=text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,alt,src)=>`<img src="${sanitizeUrl(src).replace(/"/g,'&quot;')}" alt="${sanitizeAttribute(alt)}">`);
-text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,label,href)=>`<a href="${sanitizeUrl(href).replace(/"/g,'&quot;')}">${sanitizeAttribute(label)}</a>`);
-text=escapeRemainingHtml(text);
-return text;
+text=text.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g,(m,alt,src,href)=>`<a href="${href.replace(/"/g,'&quot;')}"><img src="${src.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}"></a>`);
+text=text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,alt,src)=>`<img src="${src.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}">`);
+text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,label,href)=>`<a href="${href.replace(/"/g,'&quot;')}">${label}</a>`);
+return DOMPurify.sanitize(text,{ALLOWED_TAGS:['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'],ALLOWED_ATTR:['href','src','alt','class'],ALLOW_DATA_ATTR:false});
 }
