@@ -115,10 +115,10 @@ text=result.join("\n");
 for(let i=0;i<codeBlocks.length;i++){
 text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 }
-return DOMPurify.sanitize(text,{ALLOWED_TAGS:['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr','input','div'],ALLOWED_ATTR:['href','src','alt','class','type','checked','disabled'],ALLOW_DATA_ATTR:false});
+return DOMPurify.sanitize(text,{ADD_ATTR:["target"],ALLOWED_TAGS:["b","i","u","s","em","strong","del","mark","sub","sup","code","pre","a","img","h1","h2","h3","h4","h5","h6","p","blockquote","ul","ol","li","br","hr","input","div"],ALLOWED_ATTR:["href","target","src","alt","type","checked","disabled","class"]});
 }
 function renderInline(text){
-text=text.replace(/`([^`]+)`/g,(m,code)=>`<code>${code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code>`);
+text=text.replace(/`([^`]+)`/g,(m,code)=>`<code>${code.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</code>`);
 text=text.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
 text=text.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g,"<i>$1</i>");
 text=text.replace(/__(.+?)__/g,"<u>$1</u>");
@@ -126,8 +126,8 @@ text=text.replace(/~~(.+?)~~/g,"<s>$1</s>");
 text=text.replace(/==(.+?)==/g,"<mark>$1</mark>");
 text=text.replace(/~([^\s~]+?)~/g,"<sub>$1</sub>");
 text=text.replace(/\^([^\s\^]+?)\^/g,"<sup>$1</sup>");
-text=text.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g,(m,alt,src,href)=>`<a href="${href.replace(/"/g,'&quot;')}"><img src="${src.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}"></a>`);
-text=text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,alt,src)=>`<img src="${src.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}">`);
-text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,label,href)=>`<a href="${href.replace(/"/g,'&quot;')}">${label}</a>`);
-return DOMPurify.sanitize(text,{ALLOWED_TAGS:['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'],ALLOWED_ATTR:['href','src','alt','class'],ALLOW_DATA_ATTR:false});
+text=text.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g,(m,alt,src,href)=>`<a href="${href}" target="_blank"><img src="${src}" alt="${alt}"></a>`);
+text=text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,alt,src)=>`<img src="${src}" alt="${alt}">`);
+text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,label,href)=>`<a href="${href}" target="_blank">${label}</a>`);
+return text;
 }
