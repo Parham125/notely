@@ -118,7 +118,7 @@ text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 return text;
 }
 function escapeRemainingHtml(text){
-const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','input','br','hr'];
+const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
 let result='';
 let pos=0;
 const tagRegex=/<(\/?)([\w]+)([^>]*)>/g;
