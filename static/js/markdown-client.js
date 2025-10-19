@@ -118,7 +118,7 @@ text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 return text;
 }
 function sanitizeHtmlAttributes(attrs){
-return attrs.replace(/on\w+\s*=\s*["']?[^"'>\s]*["']?/gi,'').replace(/javascript:/gi,'');
+return attrs.replace(/on\w+\s*=\s*["']?[^"'>\s]*["']?/gi,'').replace(/style\s*=\s*["']?[^"'>\s]*["']?/gi,'').replace(/javascript:/gi,'');
 }
 function escapeRemainingHtml(text){
 const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
