@@ -118,7 +118,7 @@ text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 return text;
 }
 function escapeRemainingHtml(text){
-const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
+const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
 let result='';
 let pos=0;
 const tagRegex=/<(\/?)([\w]+)([^>]*)>/g;
@@ -135,6 +135,14 @@ pos=tagRegex.lastIndex;
 result+=text.substring(pos).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 return result;
 }
+function sanitizeUrl(url){
+const dangerousProtocols=/^(javascript|data|vbscript|file|about):/i;
+if(dangerousProtocols.test(url.trim()))return"";
+return url;
+}
+function sanitizeAttribute(str){
+return str.replace(/on\w+\s*=/gi,'').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 function renderInline(text){
 text=text.replace(/`([^`]+)`/g,(m,code)=>`<code>${code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code>`);
 text=text.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
@@ -144,9 +152,9 @@ text=text.replace(/~~(.+?)~~/g,"<s>$1</s>");
 text=text.replace(/==(.+?)==/g,"<mark>$1</mark>");
 text=text.replace(/~([^\s~]+?)~/g,"<sub>$1</sub>");
 text=text.replace(/\^([^\s\^]+?)\^/g,"<sup>$1</sup>");
-text=text.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g,(m,alt,src,href)=>`<a href="${href.replace(/"/g,'&quot;')}"><img src="${src.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}"></a>`);
-text=text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,alt,src)=>`<img src="${src.replace(/"/g,'&quot;')}" alt="${alt.replace(/"/g,'&quot;')}">`);
-text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,label,href)=>`<a href="${href.replace(/"/g,'&quot;')}">${label}</a>`);
+text=text.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g,(m,alt,src,href)=>`<a href="${sanitizeUrl(href).replace(/"/g,'&quot;')}"><img src="${sanitizeUrl(src).replace(/"/g,'&quot;')}" alt="${sanitizeAttribute(alt)}"></a>`);
+text=text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(m,alt,src)=>`<img src="${sanitizeUrl(src).replace(/"/g,'&quot;')}" alt="${sanitizeAttribute(alt)}">`);
+text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(m,label,href)=>`<a href="${sanitizeUrl(href).replace(/"/g,'&quot;')}">${sanitizeAttribute(label)}</a>`);
 text=escapeRemainingHtml(text);
 return text;
 }
