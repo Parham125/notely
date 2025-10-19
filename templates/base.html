@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>{% block title %}Notely{% endblock %}</title>
+<meta property="og:type" content="{% block og_type %}website{% endblock %}">
+<meta property="og:site_name" content="Notely">
+<meta property="og:title" content="{% block og_title %}Notely - Open Source Blog Platform{% endblock %}">
+<meta property="og:description" content="{% block og_description %}Share your thoughts with the world on Notely, a simple and elegant open source blogging platform.{% endblock %}">
+<meta property="og:url" content="{% block og_url %}{{ request.base_url }}{% endblock %}">
+<meta property="og:image" content="{% block og_image %}{{ request.base_url.rstrip('/') }}/static/favicon.ico{% endblock %}">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script>const t=localStorage.getItem("theme")||"light";document.documentElement.setAttribute("data-theme",t);</script>

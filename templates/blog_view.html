@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{blog.title}} - Notely{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{blog.title}}{% endblock %}
+{% block og_description %}{{blog.content|replace('#','')|replace('*','')|replace('_','')|replace('`','')|replace('[','')|replace(']','')|replace('(','')|replace(')','')|replace('\n',' ')|replace('\r','')|truncate(200)|trim}}{% endblock %}
+{% block og_url %}{{ request.base_url.rstrip('/') }}/blog/{{blog.id}}{% endblock %}
+{% block og_image %}{{ blog|avatar }}{% endblock %}
 {% block content %}
 <article>
 <h1>{{blog.title}}{% if blog.is_draft %}<span class="draft-badge">Draft</span>{% endif %}</h1>

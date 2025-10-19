@@ -11,6 +11,11 @@ from file_handler import save_profile_picture,save_blog_image
 from avatar_generator import get_avatar_url
 from rate_limiter import check_ip_rate_limit,check_user_rate_limit
 
+def truncate_text(text,max_length=200):
+    if len(text)<=max_length:
+        return text
+    return text[:max_length-3].strip()+"..."
+
 app=create_app()
 
 if not os.path.exists("data/notely.db"):
