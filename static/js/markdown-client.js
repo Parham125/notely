@@ -164,8 +164,12 @@ result+=text.substring(pos).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/
 return result;
 }
 function sanitizeUrl(url){
-const normalized=url.replace(/[\s\n\r\t]/g,'');
-const dangerousProtocols=/^(javascript|data|vbscript|file|about):/i;
+const decoded=url.replace(/&#x?[0-9a-f]+;?/gi,m=>{
+const code=m.startsWith('&#x')?parseInt(m.slice(3,-1)||m.slice(3),16):parseInt(m.slice(2,-1)||m.slice(2),10);
+return String.fromCharCode(code);
+}).replace(/&[a-z]+;?/gi,'');
+const normalized=decoded.replace(/[\s\n\r\t\x00-\x1f]/g,'').toLowerCase();
+const dangerousProtocols=/^(javascript|data|vbscript|file|about):/;
 if(dangerousProtocols.test(normalized))return"";
 return url;
 }
