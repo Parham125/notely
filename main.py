@@ -7,10 +7,9 @@ from database import init_db,execute_db
 from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture
 from blog_ops import get_recent_blogs,create_blog,get_blog,update_blog,delete_blog,get_user_blogs,search_blogs,get_user_by_username
 from comment_ops import create_comment,delete_comment,get_blog_comments,build_comment_tree
-from file_handler import save_profile_picture
+from file_handler import save_profile_picture,save_blog_image
 from avatar_generator import get_avatar_url
 from rate_limiter import check_ip_rate_limit,check_user_rate_limit
-from id_generator import generate_id
 
 app=create_app()
 
@@ -313,31 +312,34 @@ def upload_blog_image():
     file=request.files["file"]
     if file.filename=="":
         return jsonify({"success":False,"error":"No file selected"}),400
-    import secrets
-    from PIL import Image
-    allowed_types=["image/jpeg","image/png","image/gif","image/webp"]
-    if file.content_type not in allowed_types:
-        return jsonify({"success":False,"error":"Invalid image type"}),400
-    try:
-        img=Image.open(file)
-        img.verify()
-        file.seek(0)
-        img=Image.open(file)
-        max_size=1920
-        if img.width>max_size or img.height>max_size:
-            img.thumbnail((max_size,max_size),Image.Resampling.LANCZOS)
-        ext=file.filename.rsplit(".",1)[1].lower() if "." in file.filename else "jpg"
-        filename=f"{generate_id()}.{ext}"
-        filepath=os.path.join("static","uploads","blog_images",filename)
-        os.makedirs(os.path.dirname(filepath),exist_ok=True)
-        img.save(filepath,optimize=True,quality=90)
-        return jsonify({"success":True,"url":f"/static/uploads/blog_images/{filename}"})
-    except Exception as e:
-        return jsonify({"success":False,"error":"Invalid image file"}),400
+    filename,error=save_blog_image(file)
+    if error:
+        return jsonify({"success":False,"error":error}),400
+    return jsonify({"success":True,"url":f"/static/uploads/blog_images/{filename}"})
 
 @app.route("/health")
 def health_check():
     return "OK",200
+
+@app.errorhandler(404)
+def not_found_error(error):
+    user=get_current_user(request)
+    return render_template("error.html",user=user,error="Page not found"),404
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    user=get_current_user(request)
+    return render_template("error.html",user=user,error="Method not allowed"),405
+
+@app.errorhandler(413)
+def request_entity_too_large_error(error):
+    user=get_current_user(request)
+    return render_template("error.html",user=user,error="File too large"),413
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    user=get_current_user(request)
+    return render_template("error.html",user=user,error="Internal server error"),500
 
 if __name__=="__main__":
     serve(app,host="0.0.0.0",port=4782,threads=32)
