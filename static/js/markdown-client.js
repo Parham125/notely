@@ -118,7 +118,7 @@ text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 return text;
 }
 function sanitizeHtmlAttributes(attrs){
-return attrs.replace(/on\w+\s*=\s*["']?[^"'>\s]*["']?/gi,'').replace(/style\s*=\s*["']?[^"'>\s]*["']?/gi,'').replace(/javascript:/gi,'');
+return attrs.replace(/on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi,'').replace(/style\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi,'');
 }
 function escapeRemainingHtml(text){
 const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
@@ -164,13 +164,16 @@ result+=text.substring(pos).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/
 return result;
 }
 function sanitizeUrl(url){
-const decoded=url.replace(/&#x?[0-9a-f]+;?/gi,m=>{
+let decoded=url.replace(/&#x?[0-9a-f]+;?/gi,m=>{
 const code=m.startsWith('&#x')?parseInt(m.slice(3,-1)||m.slice(3),16):parseInt(m.slice(2,-1)||m.slice(2),10);
 return String.fromCharCode(code);
 }).replace(/&[a-z]+;?/gi,'');
-const normalized=decoded.replace(/[\s\n\r\t\x00-\x1f]/g,'').toLowerCase();
-const dangerousProtocols=/^(javascript|data|vbscript|file|about):/;
+decoded=decoded.replace(/%[0-9a-f]{2}/gi,m=>String.fromCharCode(parseInt(m.slice(1),16)));
+let normalized=decoded.replace(/[\s\n\r\t\x00-\x1f/\\]/g,'').toLowerCase();
+normalized=normalized.replace(/\/+/g,'/').replace(/\\+/g,'\\');
+const dangerousProtocols=/^(javascript|data|vbscript|file|about|blob|filesystem):/;
 if(dangerousProtocols.test(normalized))return"";
+if(normalized.startsWith('/'))return"";
 return url;
 }
 function sanitizeAttribute(str){
