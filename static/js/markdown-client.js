@@ -167,7 +167,8 @@ function sanitizeUrl(url){
 let decoded=url.replace(/&#x?[0-9a-f]+;?/gi,m=>{
 const code=m.startsWith('&#x')?parseInt(m.slice(3,-1)||m.slice(3),16):parseInt(m.slice(2,-1)||m.slice(2),10);
 return String.fromCharCode(code);
-}).replace(/&[a-z]+;?/gi,'');
+});
+decoded=decoded.replace(/&colon;/gi,':').replace(/&sol;/gi,'/').replace(/&slash;/gi,'/').replace(/&hyphen;/gi,'-').replace(/&dash;/gi,'-');
 decoded=decoded.replace(/%[0-9a-f]{2}/gi,m=>String.fromCharCode(parseInt(m.slice(1),16)));
 let normalized=decoded.replace(/[\s\n\r\t\x00-\x1f/\\]/g,'').toLowerCase();
 normalized=normalized.replace(/\/+/g,'/').replace(/\\+/g,'\\');

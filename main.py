@@ -10,6 +10,7 @@ from comment_ops import create_comment,delete_comment,get_blog_comments,build_co
 from file_handler import save_profile_picture
 from avatar_generator import get_avatar_url
 from rate_limiter import check_ip_rate_limit,check_user_rate_limit
+from id_generator import generate_id
 
 app=create_app()
 
@@ -326,7 +327,7 @@ def upload_blog_image():
         if img.width>max_size or img.height>max_size:
             img.thumbnail((max_size,max_size),Image.Resampling.LANCZOS)
         ext=file.filename.rsplit(".",1)[1].lower() if "." in file.filename else "jpg"
-        filename=f"{secrets.token_urlsafe(16)}.{ext}"
+        filename=f"{generate_id()}.{ext}"
         filepath=os.path.join("static","uploads","blog_images",filename)
         os.makedirs(os.path.dirname(filepath),exist_ok=True)
         img.save(filepath,optimize=True,quality=90)
