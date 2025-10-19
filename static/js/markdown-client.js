@@ -136,13 +136,13 @@ let attrs=match[3];
 if(!isClosing&&attrs){
 attrs=sanitizeHtmlAttributes(attrs);
 if(allowedAttrs[tagName]){
-const attrRegex=/(\w+)\s*=\s*["']?([^"'>\s]*)["']?/g;
+const attrRegex=/(\w+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*))/g;
 let attrMatch;
 let sanitizedAttrs='';
 while((attrMatch=attrRegex.exec(attrs))!==null){
 const attrName=attrMatch[1].toLowerCase();
 if(allowedAttrs[tagName].includes(attrName)){
-let attrValue=attrMatch[2];
+let attrValue=attrMatch[2]||attrMatch[3]||attrMatch[4]||'';
 if(attrName==='href'||attrName==='src'){
 attrValue=sanitizeUrl(attrValue);
 }
