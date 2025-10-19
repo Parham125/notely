@@ -164,8 +164,9 @@ result+=text.substring(pos).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/
 return result;
 }
 function sanitizeUrl(url){
+const normalized=url.replace(/[\s\n\r\t]/g,'');
 const dangerousProtocols=/^(javascript|data|vbscript|file|about):/i;
-if(dangerousProtocols.test(url.trim()))return"";
+if(dangerousProtocols.test(normalized))return"";
 return url;
 }
 function sanitizeAttribute(str){
