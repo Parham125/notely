@@ -60,6 +60,10 @@ def home():
     blogs=get_recent_blogs()
     return render_template("home.html",user=user,blogs=blogs)
 
+@app.route("/uploads/<path:file>")
+def serve_upload(file):
+    return send_from_directory("data/uploads",file)
+
 @app.route("/signup",methods=["GET"])
 def signup_page():
     user=get_current_user(request)
@@ -315,7 +319,7 @@ def upload_blog_image():
     filename,error=save_blog_image(file)
     if error:
         return jsonify({"success":False,"error":error}),400
-    return jsonify({"success":True,"url":f"/static/uploads/blog_images/{filename}"})
+    return jsonify({"success":True,"url":f"/uploads/blog_images/{filename}"})
 
 @app.route("/health")
 def health_check():

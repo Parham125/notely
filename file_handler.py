@@ -1,5 +1,5 @@
 import os
-import secrets
+from id_generator import generate_id
 from PIL import Image
 from io import BytesIO
 
@@ -39,14 +39,14 @@ def save_image(file,max_file_size,max_dimension,upload_dir,filename_prefix="",ol
             image.thumbnail((max_dimension,max_dimension),Image.Resampling.LANCZOS)
         ext_map={"image/jpeg":".jpg","image/png":".png","image/gif":".gif","image/webp":".webp"}
         ext=ext_map.get(mime_type,".jpg")
-        filename=f"{filename_prefix}{secrets.token_urlsafe(16)}{ext}"
+        filename=f"{filename_prefix}{generate_id}{ext}"
         os.makedirs(upload_dir,exist_ok=True)
         filepath=os.path.join(upload_dir,filename)
         image.save(filepath,format=image.format,quality=95,optimize=True)
-        if old_file_path and os.path.exists(old_file_path):
+        if old_file_path and os.path.isfile(old_file_path):
             try:
                 os.remove(old_file_path)
-            except Exception:
+            except:
                 pass
         return filename,None
     except Exception as e:
@@ -57,5 +57,5 @@ def save_profile_picture(file,user_id,old_picture_path=None):
     return filename,error
 
 def save_blog_image(file):
-    filename,error=save_image(file,8*1024*1024,1920,"static/uploads/blog_images","")
+    filename,error=save_image(file,8*1024*1024,1920,"data/uploads/blog_images","")
     return filename,error
