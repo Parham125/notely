@@ -1,4 +1,5 @@
 from database import query_db,execute_db
+import time
 from id_generator import generate_id
 
 def create_comment(blog_id,user_id,content,parent_id=None):
@@ -11,7 +12,8 @@ def create_comment(blog_id,user_id,content,parent_id=None):
         if not parent or parent["blog_id"]!=blog_id:
             return None,"Invalid parent comment"
     comment_id=generate_id()
-    execute_db("INSERT INTO comments(id,blog_id,user_id,content,parent_id) VALUES(?,?,?,?,?)",(comment_id,blog_id,user_id,content,parent_id))
+    created_at=int(time.time())
+    execute_db("INSERT INTO comments(id,blog_id,user_id,content,parent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?)",(comment_id,blog_id,user_id,content,parent_id,created_at,created_at))
     return comment_id,None
 
 def update_comment(comment_id,user_id,content):
@@ -24,7 +26,8 @@ def update_comment(comment_id,user_id,content):
         return False,"Comment cannot be empty"
     if len(content)>1000:
         return False,"Comment must be 1000 characters or less"
-    execute_db("UPDATE comments SET content=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",(content,comment_id))
+    updated_at=int(time.time())
+    execute_db("UPDATE comments SET content=?,updated_at=? WHERE id=?",(content,updated_at,comment_id))
     return True,None
 
 def delete_comment(comment_id,user_id):

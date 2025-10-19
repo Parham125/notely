@@ -6,7 +6,7 @@
 <div class="profile-info">
 <h1>{{profile_user.display_name}}</h1>
 <p>@{{profile_user.username}}</p>
-<p>Member since {{profile_user.created_at|datetimeformat}}</p>
+<p>Member since {{profile_user.created_at|timestampformat}}</p>
 </div>
 </div>
 {% if is_own_profile %}
@@ -20,7 +20,7 @@
 {% if not blog.is_draft %}
 <div class="blog-card">
 <div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a></div>
-<div class="blog-meta">Updated: {{blog.updated_at|datetimeformat}}</div>
+<div class="blog-meta">Updated: {{blog.updated_at|timestampformat}}</div>
 </div>
 {% endif %}
 {% endfor %}
@@ -43,7 +43,7 @@
 {% if blog.is_draft %}
 <div class="blog-card">
 <div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a><span class="draft-badge">Draft</span></div>
-<div class="blog-meta">Updated: {{blog.updated_at|datetimeformat}}</div>
+<div class="blog-meta">Updated: {{blog.updated_at|timestampformat}}</div>
 </div>
 {% endif %}
 {% endfor %}
@@ -66,7 +66,7 @@
 {% for blog in blogs %}
 <div class="blog-card">
 <div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a></div>
-<div class="blog-meta">{{blog.created_at|datetimeformat}}</div>
+<div class="blog-meta">{{blog.created_at|timestampformat}}</div>
 </div>
 {% endfor %}
 <div class="pagination" style="text-align:center;margin-top:30px;">

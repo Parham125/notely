@@ -5,13 +5,13 @@
 <h1>{{blog.title}}{% if blog.is_draft %}<span class="draft-badge">Draft</span>{% endif %}</h1>
 <div class="blog-meta" style="margin-bottom:30px;">
 <img src="{{blog|avatar}}" alt="{{blog.display_name}}" class="profile-picture" style="width:40px;height:40px;vertical-align:middle;margin-right:10px;">
-<span><a href="/profile/{{blog.username}}">{{blog.display_name}} (@{{blog.username}})</a></span> • <span>{{blog.created_at|datetimeformat}}</span>
+<span><a href="/profile/{{blog.username}}">{{blog.display_name}} (@{{blog.username}})</a></span> • <span>{{blog.created_at|timestampformat}}</span>
 {% if user and user.id==blog.user_id %}
 <a href="/blog/{{blog.id}}/edit" class="btn btn-small btn-secondary" style="margin-left:15px;">Edit</a>
 <button onclick="deleteBlog({{blog.id}})" class="btn btn-small btn-danger">Delete</button>
 {% endif %}
 </div>
-<div class="blog-content">{{blog.content_html|safe}}</div>
+<div class="blog-content" id="blog-content"></div>
 </article>
 <div class="comments-section">
 <h2>Comments</h2>
@@ -22,7 +22,7 @@
 <img src="{{comment|avatar}}" alt="{{comment.display_name}}" class="profile-picture" style="width:25px;height:25px;vertical-align:middle;margin-right:6px;">
 <a href="/profile/{{comment.username}}">{{comment.display_name}}</a>
 </div>
-<div class="comment-meta">{{comment.created_at|datetimeformat}}</div>
+<div class="comment-meta">{{comment.created_at|timestampformat}}</div>
 <div class="comment-content">{{comment.content}}</div>
 <div class="comment-actions">
 <button class="btn btn-small btn-secondary reply-btn" data-comment-id="{{comment.id}}">Reply</button>
@@ -65,7 +65,14 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="/static/js/markdown-client.js"></script>
 <script>
+const blogContent={{blog.content|tojson}};
+const rendered=renderMarkdownClient(blogContent);
+document.getElementById("blog-content").innerHTML=rendered;
+if(typeof hljs!=="undefined"){
+document.querySelectorAll("#blog-content pre code").forEach(block=>hljs.highlightElement(block));
+}
 document.querySelectorAll(".reply-btn").forEach(btn=>{
 btn.addEventListener("click",()=>{
 const commentId=btn.dataset.commentId;

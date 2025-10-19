@@ -8,7 +8,7 @@
 <div class="blog-title"><a href="/blog/{{blog.id}}">{{blog.title}}</a></div>
 <div class="blog-meta">
 <img src="{{blog|avatar}}" alt="{{blog.display_name}}" class="profile-picture" style="width:30px;height:30px;vertical-align:middle;margin-right:8px;">
-<span>{{blog.display_name}} (@{{blog.username}})</span> • <span>{{blog.created_at|datetimeformat}}</span>
+<span>{{blog.display_name}} (@{{blog.username}})</span> • <span>{{blog.created_at|timestampformat}}</span>
 </div>
 </div>
 {% endfor %}

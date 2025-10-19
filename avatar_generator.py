@@ -1,7 +1,7 @@
 import hashlib
 
 def generate_avatar_svg(username,display_name):
-    hash_value=int(hashlib.md5(username.encode()).hexdigest(),16)
+    hash_value=int(hashlib.md5(display_name.encode()).hexdigest(),16)
     colors=["#ef4444","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316"]
     bg_color=colors[hash_value%len(colors)]
     text_color="#ffffff"

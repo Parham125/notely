@@ -1,5 +1,5 @@
 from database import query_db,execute_db
-from datetime import datetime
+import time
 from id_generator import generate_id
 
 def create_blog(user_id,title,content,is_draft=1):
@@ -10,7 +10,8 @@ def create_blog(user_id,title,content,is_draft=1):
     if not content or len(content.strip())==0:
         return None,"Content cannot be empty"
     blog_id=generate_id()
-    execute_db("INSERT INTO blogs(id,user_id,title,content,is_draft) VALUES(?,?,?,?,?)",(blog_id,user_id,title,content,is_draft))
+    created_at=int(time.time())
+    execute_db("INSERT INTO blogs(id,user_id,title,content,is_draft,created_at,updated_at) VALUES(?,?,?,?,?,?,?)",(blog_id,user_id,title,content,is_draft,created_at,created_at))
     return blog_id,None
 
 def update_blog(blog_id,user_id,title,content,is_draft):
@@ -25,7 +26,8 @@ def update_blog(blog_id,user_id,title,content,is_draft):
         return False,"Title must be 200 characters or less"
     if not content or len(content.strip())==0:
         return False,"Content cannot be empty"
-    execute_db("UPDATE blogs SET title=?,content=?,is_draft=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",(title,content,is_draft,blog_id))
+    updated_at=int(time.time())
+    execute_db("UPDATE blogs SET title=?,content=?,is_draft=?,updated_at=? WHERE id=?",(title,content,is_draft,updated_at,blog_id))
     return True,None
 
 def delete_blog(blog_id,user_id):

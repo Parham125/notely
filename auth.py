@@ -84,7 +84,8 @@ def register_user(username,display_name,password):
         return None,"Password must be at least 6 characters"
     password_hash=hash_password(password)
     user_id=generate_id()
-    execute_db("INSERT INTO users(id,username,display_name,password_hash) VALUES(?,?,?,?)",(user_id,username,display_name,password_hash))
+    created_at=int(time.time())
+    execute_db("INSERT INTO users(id,username,display_name,password_hash,created_at) VALUES(?,?,?,?,?)",(user_id,username,display_name,password_hash,created_at))
     return user_id,None
 
 def login_user(username,password,user_agent):

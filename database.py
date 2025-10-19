@@ -1,4 +1,5 @@
 import sqlite3
+import time
 
 DB_PATH="data/notely.db"
 
@@ -9,6 +10,7 @@ def get_db():
 
 def init_db():
     db=sqlite3.connect(DB_PATH)
+    db.execute("PRAGMA user_version=1")
     db.execute("""
         CREATE TABLE IF NOT EXISTS users(
             id TEXT PRIMARY KEY,
@@ -16,7 +18,7 @@ def init_db():
             display_name TEXT NOT NULL,
             password_hash TEXT NOT NULL,
             profile_picture TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at INTEGER NOT NULL
         )
     """)
     db.execute("""
@@ -37,8 +39,8 @@ def init_db():
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             is_draft INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
             FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
@@ -49,11 +51,11 @@ def init_db():
             user_id TEXT NOT NULL,
             parent_id TEXT,
             content TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
             FOREIGN KEY(blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
             FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY(parent_id) REFERENCES comments(id) ON DELETE CASCADE
+            FOREIGN KEY(parent_id) REFERENCES comments(id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     """)
     db.execute("CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)")
