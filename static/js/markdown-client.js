@@ -117,8 +117,12 @@ text=text.replace(`___CODE_BLOCK_${i}___`,codeBlocks[i]);
 }
 return text;
 }
+function sanitizeHtmlAttributes(attrs){
+return attrs.replace(/on\w+\s*=\s*["']?[^"'>\s]*["']?/gi,'').replace(/javascript:/gi,'');
+}
 function escapeRemainingHtml(text){
 const allowedTags=['b','i','u','s','em','strong','del','mark','sub','sup','code','pre','a','img','h1','h2','h3','h4','h5','h6','p','blockquote','ul','ol','li','br','hr'];
+const allowedAttrs={a:['href'],img:['src','alt']};
 let result='';
 let pos=0;
 const tagRegex=/<(\/?)([\w]+)([^>]*)>/g;
@@ -126,7 +130,31 @@ let match;
 while((match=tagRegex.exec(text))!==null){
 result+=text.substring(pos,match.index).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 if(allowedTags.includes(match[2].toLowerCase())){
-result+=match[0];
+const tagName=match[2].toLowerCase();
+const isClosing=match[1]==='/';
+let attrs=match[3];
+if(!isClosing&&attrs){
+attrs=sanitizeHtmlAttributes(attrs);
+if(allowedAttrs[tagName]){
+const attrRegex=/(\w+)\s*=\s*["']?([^"'>\s]*)["']?/g;
+let attrMatch;
+let sanitizedAttrs='';
+while((attrMatch=attrRegex.exec(attrs))!==null){
+const attrName=attrMatch[1].toLowerCase();
+if(allowedAttrs[tagName].includes(attrName)){
+let attrValue=attrMatch[2];
+if(attrName==='href'||attrName==='src'){
+attrValue=sanitizeUrl(attrValue);
+}
+if(attrValue){
+sanitizedAttrs+=` ${attrName}="${attrValue.replace(/"/g,'&quot;')}"`;
+}
+}
+}
+attrs=sanitizedAttrs;
+}
+}
+result+=`<${match[1]}${tagName}${attrs}>`;
 }else{
 result+=match[0].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
