@@ -6,6 +6,9 @@
 {% block og_url %}{{ request.base_url.rstrip('/') }}/blog/{{blog.id}}{% endblock %}
 {% block og_image %}{{ blog|avatar }}{% endblock %}
 {% block content %}
+{% if error %}
+<div class="error">{{error}}</div>
+{% endif %}
 <article>
 <h1>{{blog.title}}{% if blog.is_draft %}<span class="draft-badge">Draft</span>{% endif %}</h1>
 <div class="blog-meta" style="margin-bottom:30px;">
@@ -13,7 +16,7 @@
 <span><a href="/profile/{{blog.username}}">{{blog.display_name}} (@{{blog.username}})</a></span> • <span>{{blog.created_at|timestampformat}}</span>
 {% if user and user.id==blog.user_id %}
 <a href="/blog/{{blog.id}}/edit" class="btn btn-small btn-secondary" style="margin-left:15px;">Edit</a>
-<button onclick="deleteBlog({{blog.id}})" class="btn btn-small btn-danger">Delete</button>
+<button onclick="deleteBlog('{{blog.id}}')" class="btn btn-small btn-danger">Delete</button>
 {% endif %}
 </div>
 <div class="blog-content" id="blog-content"></div>
@@ -30,11 +33,14 @@
 <div class="comment-meta">{{comment.created_at|timestampformat}}</div>
 <div class="comment-content">{{comment.content}}</div>
 <div class="comment-actions">
+{% if not comment.parent_id %}
 <button class="btn btn-small btn-secondary reply-btn" data-comment-id="{{comment.id}}">Reply</button>
+{% endif %}
 {% if user and user.id==comment.user_id %}
 <button class="btn btn-small btn-danger delete-comment-btn" data-comment-id="{{comment.id}}">Delete</button>
 {% endif %}
 </div>
+{% if not comment.parent_id %}
 <div class="reply-form" id="reply-form-{{comment.id}}" style="display:none;margin-top:15px;">
 <form method="POST" action="/blog/{{blog.id}}/comment">
 <input type="hidden" name="parent_id" value="{{comment.id}}">
@@ -43,6 +49,7 @@
 <button type="button" class="btn btn-small btn-secondary cancel-reply" data-comment-id="{{comment.id}}" style="margin-left:5px;">Cancel</button>
 </form>
 </div>
+{% endif %}
 {% if comment.replies %}
 {% for reply in comment.replies %}
 {{render_comment(reply)}}

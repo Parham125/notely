@@ -8,9 +8,11 @@ def create_comment(blog_id,user_id,content,parent_id=None):
     if len(content)>1000:
         return None,"Comment must be 1000 characters or less"
     if parent_id:
-        parent=query_db("SELECT id,blog_id FROM comments WHERE id=?",(parent_id,),one=True)
+        parent=query_db("SELECT id,blog_id,parent_id FROM comments WHERE id=?",(parent_id,),one=True)
         if not parent or parent["blog_id"]!=blog_id:
             return None,"Invalid parent comment"
+        if parent["parent_id"] is not None:
+            return None,"Cannot reply to a reply"
     comment_id=generate_id()
     created_at=int(time.time())
     execute_db("INSERT INTO comments(id,blog_id,user_id,content,parent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?)",(comment_id,blog_id,user_id,content,parent_id,created_at,created_at))
