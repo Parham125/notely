@@ -61,29 +61,65 @@ def get_user_blogs(user_id,include_drafts=False,page=1,per_page=10):
     total_pages=(total_count+per_page-1)//per_page
     return [dict(blog) for blog in blogs],total_count,total_pages,page
 
-def get_recent_blogs(limit=20):
-    blogs=query_db("""
-        SELECT b.id,b.title,b.created_at,
-               u.username,u.display_name,u.profile_picture
-        FROM blogs b
-        JOIN users u ON b.user_id=u.id
-        WHERE b.is_draft=0
-        ORDER BY b.created_at DESC
-        LIMIT ?
-    """,(limit,))
-    return [dict(blog) for blog in blogs]
+def get_recent_blogs(limit=20,page=1,per_page=10):
+    if page and per_page:
+        offset=(page-1)*per_page
+        blogs=query_db("""
+            SELECT b.id,b.title,b.created_at,
+                   u.username,u.display_name,u.profile_picture
+            FROM blogs b
+            JOIN users u ON b.user_id=u.id
+            WHERE b.is_draft=0
+            ORDER BY b.created_at DESC
+            LIMIT ? OFFSET ?
+        """,(per_page,offset))
+        total=query_db("SELECT COUNT(*) as count FROM blogs WHERE is_draft=0",(),one=True)
+        total_count=total["count"] if total else 0
+        total_pages=(total_count+per_page-1)//per_page
+        return [dict(blog) for blog in blogs],total_count,total_pages,page
+    else:
+        blogs=query_db("""
+            SELECT b.id,b.title,b.created_at,
+                   u.username,u.display_name,u.profile_picture
+            FROM blogs b
+            JOIN users u ON b.user_id=u.id
+            WHERE b.is_draft=0
+            ORDER BY b.created_at DESC
+            LIMIT ?
+        """,(limit,))
+        return [dict(blog) for blog in blogs]
 
-def search_blogs(query):
+def search_blogs(query,page=1,per_page=10):
     search_term=f"%{query}%"
-    blogs=query_db("""
-        SELECT b.id,b.title,b.created_at,
-               u.username,u.display_name,u.profile_picture
-        FROM blogs b
-        JOIN users u ON b.user_id=u.id
-        WHERE b.is_draft=0 AND (b.title LIKE ? OR b.content LIKE ?)
-        ORDER BY b.created_at DESC
-    """,(search_term,search_term))
-    return [dict(blog) for blog in blogs]
+    if page and per_page:
+        offset=(page-1)*per_page
+        blogs=query_db("""
+            SELECT b.id,b.title,b.created_at,
+                   u.username,u.display_name,u.profile_picture
+            FROM blogs b
+            JOIN users u ON b.user_id=u.id
+            WHERE b.is_draft=0 AND (b.title LIKE ? OR b.content LIKE ?)
+            ORDER BY b.created_at DESC
+            LIMIT ? OFFSET ?
+        """,(search_term,search_term,per_page,offset))
+        total=query_db("""
+            SELECT COUNT(*) as count
+            FROM blogs b
+            WHERE b.is_draft=0 AND (b.title LIKE ? OR b.content LIKE ?)
+        """,(search_term,search_term),one=True)
+        total_count=total["count"] if total else 0
+        total_pages=(total_count+per_page-1)//per_page
+        return [dict(blog) for blog in blogs],total_count,total_pages,page
+    else:
+        blogs=query_db("""
+            SELECT b.id,b.title,b.created_at,
+                   u.username,u.display_name,u.profile_picture
+            FROM blogs b
+            JOIN users u ON b.user_id=u.id
+            WHERE b.is_draft=0 AND (b.title LIKE ? OR b.content LIKE ?)
+            ORDER BY b.created_at DESC
+        """,(search_term,search_term))
+        return [dict(blog) for blog in blogs]
 
 def get_user_by_username(username):
     user=query_db("SELECT id,username,display_name,profile_picture,created_at FROM users WHERE username=?",(username,),one=True)

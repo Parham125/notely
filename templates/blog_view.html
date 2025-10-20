@@ -33,14 +33,11 @@
 <div class="comment-meta">{{comment.created_at|timestampformat}}</div>
 <div class="comment-content">{{comment.content}}</div>
 <div class="comment-actions">
-{% if not comment.parent_id %}
 <button class="btn btn-small btn-secondary reply-btn" data-comment-id="{{comment.id}}">Reply</button>
-{% endif %}
 {% if user and user.id==comment.user_id %}
 <button class="btn btn-small btn-danger delete-comment-btn" data-comment-id="{{comment.id}}">Delete</button>
 {% endif %}
 </div>
-{% if not comment.parent_id %}
 <div class="reply-form" id="reply-form-{{comment.id}}" style="display:none;margin-top:15px;">
 <form method="POST" action="/blog/{{blog.id}}/comment">
 <input type="hidden" name="parent_id" value="{{comment.id}}">
@@ -49,7 +46,6 @@
 <button type="button" class="btn btn-small btn-secondary cancel-reply" data-comment-id="{{comment.id}}" style="margin-left:5px;">Cancel</button>
 </form>
 </div>
-{% endif %}
 {% if comment.replies %}
 {% for reply in comment.replies %}
 {{render_comment(reply)}}
@@ -77,11 +73,11 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/markdown-client.js"></script>
 <script>
 const blogContent={{blog.content|tojson}};
-const rendered=renderMarkdownClient(blogContent);
-document.getElementById("blog-content").innerHTML=rendered;
+marked.setOptions({breaks:false,gfm:true});
+const rendered=marked.parse(blogContent);
+document.getElementById("blog-content").innerHTML=DOMPurify.sanitize(rendered,{ADD_ATTR:["target"],ALLOWED_TAGS:["b","i","u","s","em","strong","del","mark","sub","sup","code","pre","a","img","h1","h2","h3","h4","h5","h6","p","blockquote","ul","ol","li","br","hr","input","div"],ALLOWED_ATTR:["href","target","src","alt","type","checked","disabled","class"]});
 if(typeof hljs!=="undefined"){
 document.querySelectorAll("#blog-content pre code").forEach(block=>hljs.highlightElement(block));
 }

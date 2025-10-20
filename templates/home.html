@@ -12,6 +12,15 @@
 </div>
 </div>
 {% endfor %}
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
+<a href="/?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
+</div>
 {% else %}
 <p>No blogs yet. Be the first to create one!</p>
 {% endif %}

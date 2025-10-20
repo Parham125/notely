@@ -46,3 +46,12 @@ alert(data.error||"Failed to delete session");
 }).catch(()=>alert("Failed to delete session"));
 }
 }
+function linkifyMentions(){
+document.querySelectorAll(".comment-content").forEach(contentElement=>{
+const text=contentElement.textContent;
+const mentionRegex=/@(\w+)/g;
+const linkedText=text.replace(mentionRegex,'<a href="/profile/$1" class="comment-mention">@$1</a>');
+contentElement.innerHTML=linkedText;
+});
+}
+document.addEventListener("DOMContentLoaded",linkifyMentions);

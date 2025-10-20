@@ -2,6 +2,7 @@ from flask import request,render_template,redirect,url_for,make_response,jsonify
 from datetime import datetime
 from waitress import serve
 import os
+import time
 from config import create_app
 from database import init_db,execute_db
 from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture
@@ -56,7 +57,7 @@ def apply_ip_rate_limits():
         if not allowed:
             return render_template("error.html",user=user,error="Too many requests. Please try again later."),429
     if request.method in ["POST","PUT","DELETE"]:
-        allowed,retry=check_ip_rate_limit(ip,"write",20,60)
+        allowed,retry=check_ip_rate_limit(ip,"write",5,60)
         if not allowed:
             return render_template("error.html",user=user,error="Too many requests. Please try again later."),429
     allowed,retry=check_ip_rate_limit(ip,"general",60,60)
@@ -89,8 +90,11 @@ def clean_markdown_filter(text):
 @app.route("/")
 def home():
     user=get_current_user(request)
-    blogs=get_recent_blogs()
-    return render_template("home.html",user=user,blogs=blogs)
+    page=request.args.get("page",1,type=int)
+    if page<1:
+        page=1
+    blogs,total_count,total_pages,current_page=get_recent_blogs(page=page)
+    return render_template("home.html",user=user,blogs=blogs,current_page=current_page,total_pages=total_pages,total_count=total_count)
 
 @app.route("/signup",methods=["GET"])
 def signup_page():
@@ -141,8 +145,11 @@ def logout():
 def search():
     user=get_current_user(request)
     query=request.args.get("q","").strip()
-    blogs=search_blogs(query) if query else []
-    return render_template("search.html",user=user,query=query,blogs=blogs)
+    page=request.args.get("page",1,type=int)
+    if page<1:
+        page=1
+    blogs,total_count,total_pages,current_page=search_blogs(query,page=page) if query else ([],0,0,1)
+    return render_template("search.html",user=user,query=query,blogs=blogs,current_page=current_page,total_pages=total_pages,total_count=total_count)
 
 @app.route("/profile/<username>")
 def profile(username):
@@ -244,14 +251,18 @@ def add_comment(id):
     content=request.form.get("content","").strip()
     parent_id=request.form.get("parent_id")
     parent_id=parent_id if parent_id else None
-    comment_id,error=create_comment(id,user["id"],content,parent_id)
-    if error:
+    comment_id,mention_username=create_comment(id,user["id"],content,parent_id)
+    if not comment_id:
         blog=get_blog(id)
         if not blog:
             return render_template("error.html",user=user,error="Blog not found"),404
         comments=get_blog_comments(id)
         comment_tree=build_comment_tree(comments)
-        return render_template("blog_view.html",user=user,blog=blog,comments=comment_tree,error=error)
+        return render_template("blog_view.html",user=user,blog=blog,comments=comment_tree,error=mention_username)
+    if mention_username:
+        content=f"@{mention_username} {content}"
+        updated_at=int(time.time())
+        execute_db("UPDATE comments SET content=?,updated_at=? WHERE id=?",(content,updated_at,comment_id))
     return redirect(url_for("view_blog",id=id))
 
 @app.route("/comment/<id>/delete",methods=["POST"])

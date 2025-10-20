@@ -7,16 +7,19 @@ def create_comment(blog_id,user_id,content,parent_id=None):
         return None,"Comment cannot be empty"
     if len(content)>1000:
         return None,"Comment must be 1000 characters or less"
+    mention_username=None
     if parent_id:
-        parent=query_db("SELECT id,blog_id,parent_id FROM comments WHERE id=?",(parent_id,),one=True)
+        parent=query_db("SELECT id,blog_id,parent_id,user_id FROM comments WHERE id=?",(parent_id,),one=True)
         if not parent or parent["blog_id"]!=blog_id:
             return None,"Invalid parent comment"
         if parent["parent_id"] is not None:
-            return None,"Cannot reply to a reply"
+            parent_id=parent["parent_id"]
+            parent_user=query_db("SELECT username FROM users WHERE id=?",(parent["user_id"],),one=True)
+            mention_username=parent_user["username"] if parent_user else None
     comment_id=generate_id()
     created_at=int(time.time())
     execute_db("INSERT INTO comments(id,blog_id,user_id,content,parent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?)",(comment_id,blog_id,user_id,content,parent_id,created_at,created_at))
-    return comment_id,None
+    return comment_id,mention_username
 
 def update_comment(comment_id,user_id,content):
     comment=query_db("SELECT user_id FROM comments WHERE id=?",(comment_id,),one=True)
