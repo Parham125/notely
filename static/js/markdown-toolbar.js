@@ -148,6 +148,7 @@ function updatePreview(textarea){
 const preview=document.getElementById("markdown-preview");
 if(!preview)return;
 if(typeof marked!=="undefined"){
+marked.use({extensions:[calloutExtension]});
 marked.setOptions({breaks:false,gfm:true});
 const html=marked.parse(textarea.value);
 preview.innerHTML=DOMPurify.sanitize(html,{ADD_ATTR:["target"],ALLOWED_TAGS:["b","i","u","s","em","strong","del","mark","sub","sup","code","pre","a","img","h1","h2","h3","h4","h5","h6","p","blockquote","ul","ol","li","br","hr","input","div"],ALLOWED_ATTR:["href","target","src","alt","type","checked","disabled","class"]});
