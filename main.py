@@ -10,11 +10,34 @@ from comment_ops import create_comment,delete_comment,get_blog_comments,build_co
 from file_handler import save_profile_picture,save_blog_image
 from avatar_generator import get_avatar_url
 from rate_limiter import check_ip_rate_limit,check_user_rate_limit
+import re
 
 def truncate_text(text,max_length=200):
     if len(text)<=max_length:
         return text
     return text[:max_length-3].strip()+"..."
+
+def clean_markdown_for_og(text,max_length=200):
+    text=text.strip()
+    text=re.sub(r'!\[([^\]]*)\]\([^)]+\)','',text)
+    text=re.sub(r'\[([^\]]+)\]\([^)]+\)',r'\1',text)
+    text=re.sub(r'#+','',text)
+    text=re.sub(r'\*\*([^*]+)\*\*',r'\1',text)
+    text=re.sub(r'\*([^*]+)\*',r'\1',text)
+    text=re.sub(r'__([^_]+)__',r'\1',text)
+    text=re.sub(r'_([^_]+)_',r'\1',text)
+    text=re.sub(r'`([^`]+)`',r'\1',text)
+    text=re.sub(r'~~([^~]+)~~',r'\1',text)
+    text=re.sub(r'==([^=]+)==',r'\1',text)
+    text=re.sub(r'^\s*[-*+]\s+','',text,flags=re.MULTILINE)
+    text=re.sub(r'^\s*\d+\.\s+','',text,flags=re.MULTILINE)
+    text=re.sub(r'^\s*>\s*','',text,flags=re.MULTILINE)
+    text=re.sub(r'\n+',' ',text)
+    text=re.sub(r'\s+',' ',text)
+    text=text.strip()
+    if len(text)>max_length:
+        text=text[:max_length-3].strip()+"..."
+    return text
 
 app=create_app()
 
@@ -58,6 +81,10 @@ def timestampformat_filter(value,format="%B %d, %Y at %I:%M %p"):
 @app.template_filter("avatar")
 def avatar_filter(user):
     return get_avatar_url(user)
+
+@app.template_filter("clean_markdown")
+def clean_markdown_filter(text):
+    return clean_markdown_for_og(text)
 
 @app.route("/")
 def home():

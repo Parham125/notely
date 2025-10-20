@@ -2,21 +2,7 @@
 {% block title %}{{blog.title}} - Notely{% endblock %}
 {% block og_type %}article{% endblock %}
 {% block og_title %}{{blog.title}}{% endblock %}
-{% block og_description %}
-{% set cleaned = blog.content %}
-{% set cleaned = cleaned.replace('![]', '') %}
-{% set cleaned = cleaned.replace('![', '') %}
-{% set cleaned = cleaned.replace('](', '') %}
-{% set cleaned = cleaned.replace(')', '') %}
-{% set cleaned = cleaned.replace('#', '') %}
-{% set cleaned = cleaned.replace('*', '') %}
-{% set cleaned = cleaned.replace('_', '') %}
-{% set cleaned = cleaned.replace('`', '') %}
-{% set cleaned = cleaned.replace('\n', ' ') %}
-{% set cleaned = cleaned.replace('\r', '') %}
-{% set cleaned = cleaned.replace('  ', ' ') %}
-{{ cleaned|truncate(200)|trim }}
-{% endblock %}
+{% block og_description %}{{ blog.content|clean_markdown }}{% endblock %}
 {% block og_url %}{{ request.base_url.rstrip('/') }}/blog/{{blog.id}}{% endblock %}
 {% block og_image %}{{ blog|avatar }}{% endblock %}
 {% block content %}
