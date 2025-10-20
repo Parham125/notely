@@ -39,7 +39,7 @@ def save_image(file,max_file_size,max_dimension,upload_dir,filename_prefix="",ol
             image.thumbnail((max_dimension,max_dimension),Image.Resampling.LANCZOS)
         ext_map={"image/jpeg":".jpg","image/png":".png","image/gif":".gif","image/webp":".webp"}
         ext=ext_map.get(mime_type,".jpg")
-        filename=f"{filename_prefix}{generate_id}{ext}"
+        filename=f"{filename_prefix}{(generate_id())}{ext}"
         os.makedirs(upload_dir,exist_ok=True)
         filepath=os.path.join(upload_dir,filename)
         image.save(filepath,format=image.format,quality=95,optimize=True)
