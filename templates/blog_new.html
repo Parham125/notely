@@ -2,6 +2,19 @@
 {% block title %}New Blog - Notely{% endblock %}
 {% block content %}
 <h1>Create New Blog</h1>
+
+<div class="rules-notice">
+<h3>📋 Community Rules Reminder</h3>
+<p>Before creating a blog, please ensure your content follows our <a href="/rules" target="_blank">Community Rules</a>:</p>
+<ul>
+<li><strong>❌ No NSFW content</strong> - Keep it appropriate for all audiences</li>
+<li><strong>❌ No advertising or spam</strong> - Focus on valuable content</li>
+<li><strong>❌ No system exploitation</strong> - Report security issues to <a href="https://github.com/Parham125/notely/issues" target="_blank">GitHub Issues</a></li>
+<li><strong>✅ Be respectful and constructive</strong> - Create positive, helpful content</li>
+</ul>
+<p>Violations may result in content removal or account suspension. Read the <a href="/rules" target="_blank">full rules</a> for details.</p>
+</div>
+
 {% if error %}
 <div class="error">{{error}}</div>
 {% endif %}
@@ -24,4 +37,34 @@
 {% block scripts %}
 <script src="/static/js/markdown-toolbar.js"></script>
 <script>initMarkdownToolbar("content");</script>
+{% endblock %}
+{% block styles %}
+<style>
+.rules-notice {
+background: var(--bg-secondary);
+border: 1px solid var(--accent-color);
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 25px;
+}
+.rules-notice h3 {
+color: var(--accent-color);
+margin-top: 0;
+margin-bottom: 15px;
+}
+.rules-notice ul {
+margin: 15px 0;
+padding-left: 25px;
+}
+.rules-notice li {
+margin-bottom: 8px;
+}
+.rules-notice a {
+color: var(--accent-color);
+text-decoration: underline;
+}
+.rules-notice a:hover {
+text-decoration: none;
+}
+</style>
 {% endblock %}

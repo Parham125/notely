@@ -11,6 +11,7 @@
 <div class="tabs">
 <button class="tab active" data-tab="profile">Profile</button>
 <button class="tab" data-tab="sessions">Sessions</button>
+<button class="tab" data-tab="danger">Danger Zone</button>
 </div>
 <div id="profile" class="tab-content">
 <h2>Profile Settings</h2>
@@ -59,6 +60,35 @@ Created: {{session.created_at|timestampformat}} • Last Active: {{session.last_
 <p>No active sessions.</p>
 {% endif %}
 </div>
+<div id="danger" class="tab-content" style="display:none;">
+<h2>Danger Zone</h2>
+<div class="danger-section">
+<h3>Delete Account</h3>
+<div class="warning-box">
+<h4>⚠️ Warning: This action is irreversible!</h4>
+<p>Deleting your account will permanently remove:</p>
+<ul>
+<li>All your blog posts and drafts</li>
+<li>All your comments on other posts</li>
+<li>Your profile information</li>
+<li>Your active sessions</li>
+</ul>
+<p><strong>This action cannot be undone.</strong> Please be certain before proceeding.</p>
+</div>
+<div id="delete-error" class="error" style="display:none;"></div>
+<form id="delete-account-form" method="POST" action="/api/delete-account">
+<div class="form-group">
+<label for="delete-username">To confirm, type your username: <strong>{{user.username}}</strong></label>
+<input type="text" id="delete-username" name="username" required>
+</div>
+<div class="form-group">
+<label for="delete-confirmation">To confirm, type <strong>DELETE</strong> in all caps:</label>
+<input type="text" id="delete-confirmation" name="confirmation" required placeholder="DELETE">
+</div>
+<button type="submit" class="btn btn-danger">Delete My Account</button>
+</form>
+</div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script>
@@ -70,5 +100,78 @@ tab.classList.add("active");
 document.getElementById(tab.dataset.tab).style.display="block";
 });
 });
+
+document.getElementById("delete-account-form").addEventListener("submit",function(e){
+e.preventDefault();
+const username=document.getElementById("delete-username").value.trim();
+const confirmation=document.getElementById("delete-confirmation").value.trim();
+const errorDiv=document.getElementById("delete-error");
+errorDiv.style.display="none";
+const formData=new FormData();
+formData.append("username",username);
+formData.append("confirmation",confirmation);
+fetch("/api/delete-account",{method:"POST",body:formData})
+.then(response=>response.json())
+.then(data=>{
+if(data.success){
+document.cookie="session_token=; max-age=0; path=/";
+window.location.href="/";
+}else{
+errorDiv.textContent=data.error;
+errorDiv.style.display="block";
+}
+})
+.catch(error=>{
+errorDiv.textContent="An error occurred. Please try again.";
+errorDiv.style.display="block";
+});
+});
 </script>
+{% endblock %}
+{% block styles %}
+<style>
+.danger-section {
+border: 2px solid var(--danger);
+border-radius: 8px;
+padding: 20px;
+margin-top: 20px;
+}
+.danger-section h3 {
+color: var(--danger);
+margin-top: 0;
+}
+.warning-box {
+background: var(--bg-secondary);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 15px;
+margin-bottom: 20px;
+}
+.warning-box h4 {
+color: var(--danger);
+margin-top: 0;
+margin-bottom: 10px;
+}
+.warning-box ul {
+margin: 10px 0;
+padding-left: 20px;
+}
+.warning-box li {
+margin-bottom: 5px;
+}
+#delete-account-form .btn-danger {
+background: var(--danger);
+margin-top: 10px;
+}
+#delete-account-form .btn-danger:hover {
+background: var(--danger-hover);
+}
+.tab[data-tab="danger"] {
+background: var(--danger);
+color: white;
+}
+.tab[data-tab="danger"]:hover {
+background: var(--danger-hover);
+}
+</style>
 {% endblock %}

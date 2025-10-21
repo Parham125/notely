@@ -96,3 +96,6 @@ def login_user(username,password,user_agent):
 
 def update_profile_picture(user_id,picture_path):
     execute_db("UPDATE users SET profile_picture=? WHERE id=?",(picture_path,user_id))
+
+def delete_user(user_id):
+    execute_db("DELETE FROM users WHERE id=?",(user_id,))

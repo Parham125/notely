@@ -5,7 +5,7 @@ import os
 import time
 from config import create_app
 from database import init_db,execute_db
-from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture
+from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture,delete_user
 from blog_ops import get_recent_blogs,create_blog,get_blog,update_blog,delete_blog,get_user_blogs,search_blogs,get_user_by_username
 from comment_ops import create_comment,delete_comment,get_blog_comments,build_comment_tree
 from file_handler import save_profile_picture,save_blog_image
@@ -106,6 +106,10 @@ def signup():
     username=request.form.get("username","").strip()
     display_name=request.form.get("display_name","").strip()
     password=request.form.get("password","")
+    terms_accepted=request.form.get("terms_accepted")
+    if not terms_accepted:
+        user=get_current_user(request)
+        return render_template("signup.html",user=user,error="You must accept the Terms of Service and Privacy Policy to create an account")
     user_id,error=register_user(username,display_name,password)
     if error:
         user=get_current_user(request)
@@ -359,6 +363,83 @@ def upload_blog_image():
     if error:
         return jsonify({"success":False,"error":error}),400
     return jsonify({"success":True,"url":f"/uploads/blog_images/{filename}"})
+
+@app.route("/api/delete-account",methods=["POST"])
+def delete_account_route():
+    user=get_current_user(request)
+    if not user:
+        return jsonify({"success":False,"error":"Unauthorized"}),401
+    username=request.form.get("username","").strip()
+    confirmation=request.form.get("confirmation","").strip()
+    if username!=user["username"]:
+        return jsonify({"success":False,"error":"Username does not match"}),400
+    if confirmation!="DELETE":
+        return jsonify({"success":False,"error":"Confirmation text does not match"}),400
+    try:
+        delete_user(user["id"])
+        return jsonify({"success":True,"message":"Account deleted successfully"})
+    except Exception as e:
+        return jsonify({"success":False,"error":"Failed to delete account"}),500
+
+@app.route("/terms")
+def terms_page():
+    user=get_current_user(request)
+    return render_template("terms.html",user=user)
+
+@app.route("/privacy")
+def privacy_page():
+    user=get_current_user(request)
+    return render_template("privacy.html",user=user)
+
+@app.route("/rules")
+def rules_page():
+    user=get_current_user(request)
+    return render_template("rules.html",user=user)
+
+@app.route("/robots.txt")
+def robots_txt():
+    user=get_current_user(request)
+    robots_content="""User-agent: *
+Allow: /
+Allow: /blog/
+Allow: /profile/
+Allow: /search
+
+Disallow: /settings
+Disallow: /signin
+Disallow: /signup
+Disallow: /logout
+Disallow: /blog/new
+Disallow: /blog/*/edit
+Disallow: /blog/*/delete
+Disallow: /comment/*/delete
+Disallow: /settings/
+Disallow: /api/
+Disallow: /uploads/temp/
+
+Sitemap: """+request.base_url.rstrip('/')+"/sitemap.xml"
+    response=make_response(robots_content)
+    response.headers["Content-Type"]="text/plain"
+    return response
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    user=get_current_user(request)
+    base_url=request.base_url.rstrip('/')
+    sitemap=[ '<?xml version="1.0" encoding="UTF-8"?>',
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    sitemap.append(f'<url><loc>{base_url}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>')
+    sitemap.append(f'<url><loc>{base_url}/terms</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>')
+    sitemap.append(f'<url><loc>{base_url}/privacy</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>')
+    sitemap.append(f'<url><loc>{base_url}/rules</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>')
+    blogs=execute_db("SELECT id,updated_at FROM blogs WHERE is_draft=0 ORDER BY updated_at DESC LIMIT 50000").fetchall()
+    for blog in blogs:
+        sitemap.append(f'<url><loc>{base_url}/blog/{blog["id"]}</loc><lastmod>{datetime.fromtimestamp(blog["updated_at"]).strftime("%Y-%m-%d")}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>')
+    sitemap.append('</urlset>')
+    sitemap_content='\n'.join(sitemap)
+    response=make_response(sitemap_content)
+    response.headers["Content-Type"]="application/xml"
+    return response
 
 @app.route("/health")
 def health_check():

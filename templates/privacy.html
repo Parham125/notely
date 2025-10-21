@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy - Notely{% endblock %}
+{% block content %}
+<div class="legal-content">
+<h1>Privacy Policy</h1>
+<p class="updated-date">Last updated: 2025-10-21</p>
+
+<h2>1. Introduction</h2>
+<p>This Privacy Policy explains how Notely collects, uses, stores, and protects your personal information. We are committed to protecting your privacy and being transparent about our practices.</p>
+
+<h2>2. Information We Collect</h2>
+<p>2.1. <strong>Account Information:</strong> When you create an account, we collect:</p>
+<ul>
+<li>Username and display name</li>
+<li>Email address (if provided)</li>
+<li>Password (stored as encrypted hash)</li>
+<li>Profile picture (if uploaded)</li>
+</ul>
+
+<p>2.2. <strong>Content Information:</strong> We store content you create:</p>
+<ul>
+<li>Blog posts and drafts</li>
+<li>Comments on other posts</li>
+<li>Profile information</li>
+</ul>
+
+<p>2.3. <strong>Technical Information:</strong> We automatically collect:</p>
+<ul>
+<li>IP address for security purposes</li>
+<li>Browser and device information</li>
+<li>Session data for authentication</li>
+<li>Access logs and timestamps</li>
+</ul>
+
+<h2>3. How We Use Your Information</h2>
+<p>3.1. <strong>Service Provision:</strong> To provide and maintain the blogging platform</p>
+<p>3.2. <strong>Security:</strong> To protect against fraud and unauthorized access</p>
+<p>3.3. <strong>Communication:</strong> To respond to your inquiries and support requests</p>
+<p>3.4. <strong>Improvement:</strong> To analyze usage patterns and improve our service</p>
+
+<h2>4. Data Storage and Security</h2>
+<p>4.1. Your data is stored securely in our database systems.</p>
+<p>4.2. Passwords are hashed using bcrypt and are never stored in plain text.</p>
+<p>4.3. We implement appropriate technical and organizational security measures.</p>
+<p>4.4. Database backups are created regularly to prevent data loss.</p>
+
+<h2>5. Cookies and Tracking</h2>
+<p>5.1. We use essential cookies for:</p>
+<ul>
+<li>Session management (keeping you logged in)</li>
+<li>Security tokens</li>
+<li>Theme preferences</li>
+</ul>
+
+<p>5.2. We do not use tracking cookies for advertising purposes.</p>
+<p>5.3. Third-party services (like code highlighting libraries) may set their own cookies.</p>
+
+<h2>6. Content Visibility</h2>
+<p>6.1. Published blog posts are publicly visible and searchable.</p>
+<p>6.2. Drafts are only visible to you.</p>
+<p>6.3. Your profile information is visible to other users.</p>
+<p>6.4. Comments are visible on the posts where they are made.</p>
+
+<h2>7. Third-Party Services</h2>
+<p>7.1. We use third-party libraries for:</p>
+<ul>
+<li>Code syntax highlighting (highlight.js)</li>
+<li>Markdown processing (marked.js)</li>
+<li>Content sanitization (DOMPurify)</li>
+</ul>
+
+<p>7.2. These services have their own privacy policies and terms.</p>
+
+<h2>8. Data Retention</h2>
+<p>8.1. We retain your account data while your account is active.</p>
+<p>8.2. Deleted accounts and content are removed from public view immediately.</p>
+<p>8.3. Some data may remain in backup systems for a limited period.</p>
+
+<h2>9. Your Rights</h2>
+<p>9.1. <strong>Access:</strong> You can view and export your data at any time.</p>
+<p>9.2. <strong>Correction:</strong> You can update your profile information.</p>
+<p>9.3. <strong>Deletion:</strong> You can delete your account and associated content.</p>
+<p>9.4. <strong>Portability:</strong> You can request a copy of your data.</p>
+
+<h2>10. Children's Privacy</h2>
+<p>10.1. Notely is not intended for children under 13.</p>
+<p>10.2. We do not knowingly collect personal information from children under 13.</p>
+<p>10.3. If we become aware of collecting information from a child under 13, we will delete it promptly.</p>
+
+<h2>11. International Users</h2>
+<p>11.1. Notely is hosted and may process data internationally.</p>
+<p>11.2. By using our service, you consent to international data transfers.</p>
+
+<h2>12. Security Breaches</h2>
+<p>12.1. In the event of a data breach, we will:</p>
+<ul>
+<li>Investigate promptly</li>
+<li>Notify affected users if appropriate</li>
+<li>Take measures to prevent future incidents</li>
+<li>Report to authorities if required by law</li>
+</ul>
+
+<h2>13. Changes to This Policy</h2>
+<p>13.1. We may update this Privacy Policy from time to time.</p>
+<p>13.2. We will notify users of significant changes.</p>
+<p>13.3. Continued use of the service constitutes acceptance of changes.</p>
+
+<h2>14. Contact Information</h2>
+<p>For privacy-related questions or concerns, please create an issue on our GitHub repository: <a href="https://github.com/Parham125/notely/issues">https://github.com/Parham125/notely/issues</a></p>
+
+<h2>15. Legal Basis for Processing</h2>
+<p>15.1. Our legal basis for processing your information includes:</p>
+<ul>
+<li>Contractual necessity (providing the service you requested)</li>
+<li>Legitimate interests (security, improvement, and safety)</li>
+<li>Legal compliance (when required by law)</li>
+</ul>
+</div>
+
+<style>
+.legal-content {
+max-width: 800px;
+margin: 0 auto;
+line-height: 1.6;
+}
+.legal-content h1 {
+color: var(--text-color);
+border-bottom: 2px solid var(--accent-color);
+padding-bottom: 10px;
+}
+.legal-content h2 {
+color: var(--text-color);
+margin-top: 30px;
+margin-bottom: 15px;
+}
+.legal-content ul {
+margin: 15px 0;
+padding-left: 30px;
+}
+.legal-content li {
+margin-bottom: 8px;
+}
+.updated-date {
+color: var(--text-muted);
+font-style: italic;
+margin-bottom: 30px;
+}
+</style>
+{% endblock %}

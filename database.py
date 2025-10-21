@@ -1,16 +1,19 @@
 import sqlite3
-import time
 
 DB_PATH="data/notely.db"
 
 def get_db():
     db=sqlite3.connect(DB_PATH)
     db.row_factory=sqlite3.Row
+    db.execute("PRAGMA foreign_keys=ON")
+    db.execute("PRAGMA journal_mode=WAL")
     return db
 
 def init_db():
     db=sqlite3.connect(DB_PATH)
     db.execute("PRAGMA user_version=1")
+    db.execute("PRAGMA foreign_keys=ON")
+    db.execute("PRAGMA journal_mode=WAL")
     db.execute("""
         CREATE TABLE IF NOT EXISTS users(
             id TEXT PRIMARY KEY,
