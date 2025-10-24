@@ -10,6 +10,9 @@
 <a href="/admin/comments" class="admin-nav-link">Comments</a>
 </div>
 </div>
+<div class="admin-info" style="margin-bottom:20px;">
+<p><strong>Total Users:</strong> {{total_users}} • Showing page {{current_page}} of {{total_pages}}</p>
+</div>
 <div class="admin-controls" style="margin-bottom:20px;">
 <form method="GET" class="search-form">
 <input type="text" name="search" value="{{search}}" placeholder="Search users by username or display name..." class="search-input">
@@ -61,8 +64,8 @@
 {% if current_page>1 %}
 <a href="/admin/users?page={{current_page-1}}&search={{search}}" class="btn btn-secondary btn-small">← Previous</a>
 {% endif %}
-<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}}</span>
-{% if has_more %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
 <a href="/admin/users?page={{current_page+1}}&search={{search}}" class="btn btn-secondary btn-small">Next →</a>
 {% endif %}
 </div>

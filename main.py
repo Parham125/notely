@@ -463,8 +463,12 @@ def admin_users():
     if page<1:
         page=1
     users=get_all_users(limit=50,offset=(page-1)*50,search=search)
-    has_more=len(users)==50
-    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search,has_more=has_more)
+    if search:
+        total_users=query_db("SELECT COUNT(*) as count FROM users WHERE username LIKE ? OR display_name LIKE ?",(f"%{search}%",f"%{search}%"),one=True)["count"]
+    else:
+        total_users=query_db("SELECT COUNT(*) as count FROM users",one=True)["count"]
+    total_pages=(total_users+49)//50
+    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search,total_users=total_users,total_pages=total_pages)
 
 @app.route("/admin/blogs")
 @require_admin
