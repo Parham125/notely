@@ -4,6 +4,8 @@ import threading
 from database import query_db,execute_db,get_user_role,update_user_role
 from id_generator import generate_id,generate_session_token
 
+role_lock=threading.Lock()
+
 def parse_user_agent(user_agent):
     ua=user_agent.lower()
     if "mobile" in ua or "android" in ua or "iphone" in ua:
@@ -87,7 +89,7 @@ def promote_user_to_admin(promoter_id,user_id):
     if promoter_role!='admin':
         return False,"Only admins can promote users"
 
-    threading.Lock().acquire()
+    role_lock.acquire()
     try:
         current_role=get_user_role(user_id)
         if current_role=='admin':
@@ -101,14 +103,14 @@ def promote_user_to_admin(promoter_id,user_id):
             return True,f"User {user['username']} promoted to admin"
         return False,"Failed to promote user"
     finally:
-        threading.Lock().release()
+        role_lock.release()
 
 def demote_admin_to_user(demoter_id,user_id):
     demoter_role=get_user_role(demoter_id)
     if demoter_role!='admin':
         return False,"Only admins can demote users"
 
-    threading.Lock().acquire()
+    role_lock.acquire()
     try:
         current_role=get_user_role(user_id)
         if current_role!='admin':
@@ -126,7 +128,7 @@ def demote_admin_to_user(demoter_id,user_id):
             return True,f"Admin {user['username']} demoted to user"
         return False,"Failed to demote admin"
     finally:
-        threading.Lock().release()
+        role_lock.release()
 
 def hash_password(password):
     return bcrypt.hashpw(password.encode("utf-8"),bcrypt.gensalt()).decode("utf-8")

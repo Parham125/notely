@@ -42,8 +42,7 @@ def clean_markdown_for_og(text,max_length=200):
 
 app=create_app()
 
-if not os.path.exists("data/notely.db"):
-    init_db()
+init_db()
 
 @app.before_request
 def apply_ip_rate_limits():
