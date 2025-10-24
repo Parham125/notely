@@ -1,0 +1,74 @@
+{% extends "../base.html" %}
+{% block title %}Blog Management - Admin - Notely{% endblock %}
+{% block content %}
+<div class="admin-header">
+<h1>Blog Management</h1>
+<div class="admin-nav">
+<a href="/admin" class="admin-nav-link">Dashboard</a>
+<a href="/admin/users" class="admin-nav-link">Users</a>
+<a href="/admin/blogs" class="admin-nav-link active">Blogs</a>
+<a href="/admin/comments" class="admin-nav-link">Comments</a>
+</div>
+</div>
+<div class="admin-info" style="margin-bottom:20px;">
+<p><strong>Total Blogs:</strong> {{total_blogs}} • Showing page {{current_page}}</p>
+</div>
+{% if blogs %}
+<div class="admin-table-container">
+<table class="admin-table">
+<thead>
+<tr>
+<th>Title</th>
+<th>Author</th>
+<th>Status</th>
+<th>Created</th>
+<th>Updated</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for blog in blogs %}
+<tr>
+<td style="max-width:300px;">
+<a href="/blog/{{blog.id}}" target="_blank" class="blog-link">{{blog.title}}</a>
+</td>
+<td>
+<img src="{{blog|avatar}}" alt="{{blog.display_name}}" class="profile-picture" style="width:30px;height:30px;vertical-align:middle;margin-right:8px;">
+{{blog.display_name}} (@{{blog.username}})
+</td>
+<td>
+{% if blog.is_draft %}
+<span class="status-badge status-draft">Draft</span>
+{% else %}
+<span class="status-badge status-published">Published</span>
+{% endif %}
+</td>
+<td>{{blog.created_at|timestampformat}}</td>
+<td>{{blog.updated_at|timestampformat}}</td>
+<td>
+<div class="action-buttons">
+<button onclick="deleteBlog('{{blog.id}}', '{{blog.title}}')" class="btn btn-small btn-danger">Delete</button>
+</div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/admin/blogs?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
+<a href="/admin/blogs?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
+</div>
+{% else %}
+<div class="admin-empty">
+<p>No blogs found.</p>
+</div>
+{% endif %}
+
+<div id="message-container" style="position:fixed;top:20px;right:20px;z-index:1000;"></div>
+{% endblock %}

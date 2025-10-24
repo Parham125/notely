@@ -1,0 +1,78 @@
+{% extends "../base.html" %}
+{% block title %}User Management - Admin - Notely{% endblock %}
+{% block content %}
+<div class="admin-header">
+<h1>User Management</h1>
+<div class="admin-nav">
+<a href="/admin" class="admin-nav-link">Dashboard</a>
+<a href="/admin/users" class="admin-nav-link active">Users</a>
+<a href="/admin/blogs" class="admin-nav-link">Blogs</a>
+<a href="/admin/comments" class="admin-nav-link">Comments</a>
+</div>
+</div>
+<div class="admin-controls" style="margin-bottom:20px;">
+<form method="GET" class="search-form">
+<input type="text" name="search" value="{{search}}" placeholder="Search users by username or display name..." class="search-input">
+<button type="submit" class="btn btn-primary">Search</button>
+{% if search %}
+<a href="/admin/users" class="btn btn-secondary">Clear</a>
+{% endif %}
+</form>
+</div>
+{% if users %}
+<div class="admin-table-container">
+<table class="admin-table">
+<thead>
+<tr>
+<th>Avatar</th>
+<th>Username</th>
+<th>Display Name</th>
+<th>Role</th>
+<th>Created</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for user in users %}
+<tr>
+<td><img src="{{user|avatar}}" alt="{{user.display_name}}" class="profile-picture" style="width:40px;height:40px;"></td>
+<td>{{user.username}}</td>
+<td>{{user.display_name}}</td>
+<td>
+<span class="role-badge role-{{user.role}}">{{user.role}}</span>
+</td>
+<td>{{user.created_at|timestampformat}}</td>
+<td>
+<div class="action-buttons">
+{% if user.role == 'user' %}
+<button onclick="promoteUser('{{user.id}}', '{{user.username}}')" class="btn btn-small btn-success">Promote</button>
+{% else %}
+<button onclick="demoteUser('{{user.id}}', '{{user.username}}')" class="btn btn-small btn-warning">Demote</button>
+{% endif %}
+<button onclick="deleteUser('{{user.id}}', '{{user.username}}')" class="btn btn-small btn-danger">Delete</button>
+</div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/admin/users?page={{current_page-1}}&search={{search}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}}</span>
+<a href="/admin/users?page={{current_page+1}}&search={{search}}" class="btn btn-secondary btn-small">Next →</a>
+</div>
+{% else %}
+<div class="admin-empty">
+{% if search %}
+<p>No users found matching "{{search}}".</p>
+{% else %}
+<p>No users found.</p>
+{% endif %}
+</div>
+{% endif %}
+
+<div id="message-container" style="position:fixed;top:20px;right:20px;z-index:1000;"></div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "../base.html" %}
+{% block title %}Admin Dashboard - Notely{% endblock %}
+{% block content %}
+<div class="admin-header">
+<h1>Admin Dashboard</h1>
+<div class="admin-nav">
+<a href="/admin" class="admin-nav-link active">Dashboard</a>
+<a href="/admin/users" class="admin-nav-link">Users</a>
+<a href="/admin/blogs" class="admin-nav-link">Blogs</a>
+<a href="/admin/comments" class="admin-nav-link">Comments</a>
+</div>
+</div>
+<div class="admin-stats">
+<div class="stat-card">
+<div class="stat-number">{{stats.total_users}}</div>
+<div class="stat-label">Total Users</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">{{stats.total_blogs}}</div>
+<div class="stat-label">Total Blogs</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">{{stats.total_comments}}</div>
+<div class="stat-label">Total Comments</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">{{stats.admin_count}}</div>
+<div class="stat-label">Admins</div>
+</div>
+</div>
+<div class="admin-info">
+<div class="info-card">
+<h3>System Information</h3>
+<p><strong>Database Version:</strong> v{{db_version}}</p>
+<p><strong>Migration Status:</strong> <span style="color:var(--success-color);">Up to date</span></p>
+<p><strong>Admin Panel:</strong> Active</p>
+</div>
+</div>
+{% endblock %}

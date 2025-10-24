@@ -1,0 +1,68 @@
+{% extends "../base.html" %}
+{% block title %}Comment Management - Admin - Notely{% endblock %}
+{% block content %}
+<div class="admin-header">
+<h1>Comment Management</h1>
+<div class="admin-nav">
+<a href="/admin" class="admin-nav-link">Dashboard</a>
+<a href="/admin/users" class="admin-nav-link">Users</a>
+<a href="/admin/blogs" class="admin-nav-link">Blogs</a>
+<a href="/admin/comments" class="admin-nav-link active">Comments</a>
+</div>
+</div>
+<div class="admin-info" style="margin-bottom:20px;">
+<p><strong>Total Comments:</strong> {{total_comments}} • Showing page {{current_page}}</p>
+</div>
+{% if comments %}
+<div class="admin-table-container">
+<table class="admin-table">
+<thead>
+<tr>
+<th>Comment</th>
+<th>Author</th>
+<th>Blog Post</th>
+<th>Created</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for comment in comments %}
+<tr>
+<td style="max-width:300px;">
+<div class="comment-content">{{comment.content[:100]}}{% if comment.content|length > 100 %}...{% endif %}</div>
+</td>
+<td>
+<img src="{{comment|avatar}}" alt="{{comment.display_name}}" class="profile-picture" style="width:30px;height:30px;vertical-align:middle;margin-right:8px;">
+{{comment.display_name}} (@{{comment.username}})
+</td>
+<td>
+<a href="/blog/{{comment.blog_id}}" target="_blank" class="blog-link">{{comment.blog_title}}</a>
+</td>
+<td>{{comment.created_at|timestampformat}}</td>
+<td>
+<div class="action-buttons">
+<button onclick="deleteComment('{{comment.id}}')" class="btn btn-small btn-danger">Delete</button>
+</div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="pagination" style="text-align:center;margin-top:30px;">
+{% if current_page>1 %}
+<a href="/admin/comments?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+{% endif %}
+<span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
+{% if current_page<total_pages %}
+<a href="/admin/comments?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
+</div>
+{% else %}
+<div class="admin-empty">
+<p>No comments found.</p>
+</div>
+{% endif %}
+
+<div id="message-container" style="position:fixed;top:20px;right:20px;z-index:1000;"></div>
+{% endblock %}

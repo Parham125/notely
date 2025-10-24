@@ -26,6 +26,9 @@
 <a href="/blog/new">New Blog</a>
 <a href="/profile/{{user.username}}">Profile</a>
 <a href="/settings">Settings</a>
+{% if user.role == 'admin' %}
+<a href="/admin" style="color:var(--accent-color);font-weight:bold;">Admin</a>
+{% endif %}
 <a href="/logout">Logout</a>
 {% else %}
 <a href="/">Home</a>
@@ -58,6 +61,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
 <script src="/static/js/theme.js"></script>
 <script src="/static/js/comments.js"></script>
+{% if request.path.startswith('/admin') %}
+<script src="/static/js/admin.js"></script>
+{% endif %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
 {% block scripts %}{% endblock %}

@@ -4,8 +4,8 @@ from waitress import serve
 import os
 import time
 from config import create_app
-from database import init_db,execute_db
-from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture,delete_user
+from database import init_db,execute_db,get_all_users,get_user_stats,get_db_version
+from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture,delete_user,require_admin,promote_user_to_admin,demote_admin_to_user,is_admin
 from blog_ops import get_recent_blogs,create_blog,get_blog,update_blog,delete_blog,get_user_blogs,search_blogs,get_user_by_username
 from comment_ops import create_comment,delete_comment,get_blog_comments,build_comment_tree
 from file_handler import save_profile_picture,save_blog_image
@@ -416,6 +416,8 @@ Disallow: /comment/*/delete
 Disallow: /settings/
 Disallow: /api/
 Disallow: /uploads/temp/
+Disallow: /admin
+Disallow: /admin/
 
 Sitemap: """+request.base_url.rstrip('/')+"/sitemap.xml"
     response=make_response(robots_content)
@@ -444,6 +446,121 @@ def sitemap_xml():
 @app.route("/health")
 def health_check():
     return "OK",200
+
+@app.route("/admin")
+@require_admin
+def admin_dashboard():
+    user=get_current_user(request)
+    stats=get_user_stats()
+    db_version=get_db_version()
+    return render_template("admin/dashboard.html",user=user,stats=stats,db_version=db_version)
+
+@app.route("/admin/users")
+@require_admin
+def admin_users():
+    user=get_current_user(request)
+    page=request.args.get("page",1,type=int)
+    search=request.args.get("search","").strip()
+    if page<1:
+        page=1
+    users=get_all_users(limit=50,offset=(page-1)*50,search=search)
+    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search)
+
+@app.route("/admin/blogs")
+@require_admin
+def admin_blogs():
+    user=get_current_user(request)
+    page=request.args.get("page",1,type=int)
+    if page<1:
+        page=1
+    offset=(page-1)*50
+    blogs=execute_db("""
+        SELECT b.*, u.username, u.display_name
+        FROM blogs b
+        JOIN users u ON b.user_id = u.id
+        ORDER BY b.created_at DESC
+        LIMIT 50 OFFSET ?
+    """,(offset,)).fetchall()
+    total_blogs=execute_db("SELECT COUNT(*) as count FROM blogs",one=True)["count"]
+    total_pages=(total_blogs+49)//50
+    return render_template("admin/blogs.html",user=user,blogs=blogs,current_page=page,total_pages=total_pages,total_blogs=total_blogs)
+
+@app.route("/admin/comments")
+@require_admin
+def admin_comments():
+    user=get_current_user(request)
+    page=request.args.get("page",1,type=int)
+    if page<1:
+        page=1
+    offset=(page-1)*50
+    comments=execute_db("""
+        SELECT c.*, u.username, u.display_name, b.title as blog_title
+        FROM comments c
+        JOIN users u ON c.user_id = u.id
+        JOIN blogs b ON c.blog_id = b.id
+        ORDER BY c.created_at DESC
+        LIMIT 50 OFFSET ?
+    """,(offset,)).fetchall()
+    total_comments=execute_db("SELECT COUNT(*) as count FROM comments",one=True)["count"]
+    total_pages=(total_comments+49)//50
+    return render_template("admin/comments.html",user=user,comments=comments,current_page=page,total_pages=total_pages,total_comments=total_comments)
+
+@app.route("/admin/promote/<user_id>",methods=["POST"])
+@require_admin
+def admin_promote_user(user_id):
+    user=get_current_user(request)
+    success,message=promote_user_to_admin(user["id"],user_id)
+    return jsonify({"success":success,"message":message})
+
+@app.route("/admin/demote/<user_id>",methods=["POST"])
+@require_admin
+def admin_demote_user(user_id):
+    user=get_current_user(request)
+    success,message=demote_admin_to_user(user["id"],user_id)
+    return jsonify({"success":success,"message":message})
+
+@app.route("/admin/delete-user/<user_id>",methods=["POST"])
+@require_admin
+def admin_delete_user(user_id):
+    user=get_current_user(request)
+    target_user=execute_db("SELECT role FROM users WHERE id=?",(user_id,),one=True)
+    if not target_user:
+        return jsonify({"success":False,"error":"User not found"}),404
+    if target_user["role"]=="admin":
+        admin_count=execute_db("SELECT COUNT(*) as count FROM users WHERE role='admin'",one=True)["count"]
+        if admin_count<=1:
+            return jsonify({"success":False,"error":"Cannot delete the last admin"}),400
+    try:
+        execute_db("DELETE FROM users WHERE id=?",(user_id,))
+        return jsonify({"success":True,"message":"User deleted successfully"})
+    except Exception as e:
+        return jsonify({"success":False,"error":"Failed to delete user"}),500
+
+@app.route("/admin/delete-blog/<blog_id>",methods=["POST"])
+@require_admin
+def admin_delete_blog(blog_id):
+    user=get_current_user(request)
+    blog=execute_db("SELECT id FROM blogs WHERE id=?",(blog_id,),one=True)
+    if not blog:
+        return jsonify({"success":False,"error":"Blog not found"}),404
+    try:
+        execute_db("DELETE FROM blogs WHERE id=?",(blog_id,))
+        return jsonify({"success":True,"message":"Blog deleted successfully"})
+    except Exception as e:
+        return jsonify({"success":False,"error":"Failed to delete blog"}),500
+
+@app.route("/admin/delete-comment/<comment_id>",methods=["POST"])
+@require_admin
+def admin_delete_comment(comment_id):
+    user=get_current_user(request)
+    comment=execute_db("SELECT id FROM comments WHERE id=?",(comment_id,),one=True)
+    if not comment:
+        return jsonify({"success":False,"error":"Comment not found"}),404
+    try:
+        execute_db("DELETE FROM comments WHERE id=?",(comment_id,))
+        return jsonify({"success":True,"message":"Comment deleted successfully"})
+    except Exception as e:
+        return jsonify({"success":False,"error":"Failed to delete comment"}),500
 
 @app.errorhandler(404)
 def not_found_error(error):
