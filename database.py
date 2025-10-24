@@ -26,14 +26,6 @@ def set_db_version(version):
     db.commit()
     db.close()
 
-def backup_database():
-    if not os.path.exists("data"):
-        os.makedirs("data")
-    backup_path=f"data/notely_backup_{get_db_version()}.db"
-    with open(DB_PATH,'rb') as src, open(backup_path,'wb') as dst:
-        dst.write(src.read())
-    return backup_path
-
 def run_migration(migration_file):
     migration_path=os.path.join(MIGRATIONS_DIR,migration_file)
     if not os.path.exists(migration_path):
@@ -41,50 +33,36 @@ def run_migration(migration_file):
     with open(migration_path,'r') as f:
         migration_sql=f.read()
     db=sqlite3.connect(DB_PATH)
-    try:
-        db.executescript(migration_sql)
-        db.commit()
-    except sqlite3.OperationalError as e:
-        if "duplicate column name" in str(e):
-            pass  # Ignore existing columns silently
-        else:
-            raise
-    finally:
-        # Set version after successful migration
-        if 'v1_to_v2.sql' == migration_file:
-            set_db_version(2)
-        db.close()
+    db.executescript(migration_sql)
+    db.commit()
+    db.close()
 
 def run_migrations():
     current_version=get_db_version()
-    latest_version=1
     if os.path.exists(MIGRATIONS_DIR):
+        migration_files=[]
         for file in os.listdir(MIGRATIONS_DIR):
-            if file.endswith('.sql') and file.startswith('v'):
-                parts=file.replace('.sql','').split('_to_')
-                if len(parts)==2:
-                    try:
-                        from_version=int(parts[0][1:])
-                        to_version=int(parts[1][1:])
-                        if from_version==current_version and to_version>current_version:
-                            backup_database()
-                            run_migration(file)
-                            current_version=to_version
-                            latest_version=max(latest_version,to_version)
-                    except ValueError:
-                        continue
+            if file.endswith('.sql') and file.replace('.sql','').isdigit():
+                migration_files.append(int(file.replace('.sql','')))
+        migration_files.sort()  # Sort numerically since we converted to int
+        for version in migration_files:
+            if version>current_version:
+                run_migration(f"{version}.sql")
+                current_version=version
     return current_version
 
 def init_db():
     if not os.path.exists("data"):
         os.makedirs("data")
     db_exists=os.path.exists(DB_PATH)
+
     db=sqlite3.connect(DB_PATH)
     db.execute("PRAGMA foreign_keys=ON")
     db.execute("PRAGMA journal_mode=WAL")
 
-    if not db_exists:
-        db.execute("PRAGMA user_version=2")
+    if db_exists:
+        run_migrations()
+
     db.execute("""
         CREATE TABLE IF NOT EXISTS users(
             id TEXT PRIMARY KEY,
@@ -141,7 +119,9 @@ def init_db():
     db.execute("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)")
     db.commit()
     db.close()
-    run_migrations()
+
+    if not db_exists:
+        set_db_version(2)
 
 def get_admin_count():
     result=query_db("SELECT COUNT(*) as count FROM users WHERE role='admin'",one=True)
