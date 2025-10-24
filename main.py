@@ -463,7 +463,8 @@ def admin_users():
     if page<1:
         page=1
     users=get_all_users(limit=50,offset=(page-1)*50,search=search)
-    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search)
+    has_more=len(users)==50
+    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search,has_more=has_more)
 
 @app.route("/admin/blogs")
 @require_admin

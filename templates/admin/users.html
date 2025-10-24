@@ -62,7 +62,9 @@
 <a href="/admin/users?page={{current_page-1}}&search={{search}}" class="btn btn-secondary btn-small">← Previous</a>
 {% endif %}
 <span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}}</span>
+{% if has_more %}
 <a href="/admin/users?page={{current_page+1}}&search={{search}}" class="btn btn-secondary btn-small">Next →</a>
+{% endif %}
 </div>
 {% else %}
 <div class="admin-empty">
