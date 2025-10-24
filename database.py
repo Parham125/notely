@@ -1,10 +1,8 @@
 import sqlite3
 import os
-import threading
 
 DB_PATH="data/notely.db"
 MIGRATIONS_DIR="migrations"
-DB_LOCK=threading.Lock()
 
 def get_db():
     db=sqlite3.connect(DB_PATH)
@@ -43,9 +41,19 @@ def run_migration(migration_file):
     with open(migration_path,'r') as f:
         migration_sql=f.read()
     db=sqlite3.connect(DB_PATH)
-    db.executescript(migration_sql)
-    db.commit()
-    db.close()
+    try:
+        db.executescript(migration_sql)
+        db.commit()
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" in str(e):
+            pass  # Ignore existing columns silently
+        else:
+            raise
+    finally:
+        # Set version after successful migration
+        if 'v1_to_v2.sql' == migration_file:
+            set_db_version(2)
+        db.close()
 
 def run_migrations():
     with DB_LOCK:
@@ -78,7 +86,7 @@ def init_db():
         db.execute("PRAGMA journal_mode=WAL")
 
         if not db_exists:
-            db.execute("PRAGMA user_version=1")
+            db.execute("PRAGMA user_version=2")
         db.execute("""
             CREATE TABLE IF NOT EXISTS users(
                 id TEXT PRIMARY KEY,
@@ -86,6 +94,7 @@ def init_db():
                 display_name TEXT NOT NULL,
                 password_hash TEXT NOT NULL,
                 profile_picture TEXT,
+                role TEXT DEFAULT 'user',
                 created_at INTEGER NOT NULL
             )
         """)
@@ -141,19 +150,17 @@ def get_admin_count():
     return result['count'] if result else 0
 
 def ensure_at_least_one_admin():
-    with DB_LOCK:
-        if get_admin_count()==0:
-            first_user=query_db("SELECT id FROM users ORDER BY created_at LIMIT 1",one=True)
-            if first_user:
-                execute_db("UPDATE users SET role='admin' WHERE id=?",(first_user['id'],))
-                return True
+    if get_admin_count()==0:
+        first_user=query_db("SELECT id FROM users ORDER BY created_at LIMIT 1",one=True)
+        if first_user:
+            execute_db("UPDATE users SET role='admin' WHERE id=?",(first_user['id'],))
+            return True
     return False
 
 def update_user_role(user_id,role):
-    with DB_LOCK:
-        if role!='admin' and get_admin_count()<=1 and get_user_role(user_id)=='admin':
-            return False
-        execute_db("UPDATE users SET role=? WHERE id=?",(role,user_id))
+    if role!='admin' and get_admin_count()<=1 and get_user_role(user_id)=='admin':
+        return False
+    execute_db("UPDATE users SET role=? WHERE id=?",(role,user_id))
         return True
 
 def get_user_role(user_id):
