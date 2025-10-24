@@ -4,7 +4,7 @@ from waitress import serve
 import os
 import time
 from config import create_app
-from database import init_db,execute_db,get_all_users,get_user_stats,get_db_version
+from database import init_db,execute_db,query_db,get_all_users,get_user_stats,get_db_version
 from auth import get_current_user,register_user,login_user,delete_session,delete_session_by_id,get_user_sessions,create_session,update_profile_picture,delete_user,require_admin,promote_user_to_admin,demote_admin_to_user,is_admin
 from blog_ops import get_recent_blogs,create_blog,get_blog,update_blog,delete_blog,get_user_blogs,search_blogs,get_user_by_username
 from comment_ops import create_comment,delete_comment,get_blog_comments,build_comment_tree
@@ -473,14 +473,14 @@ def admin_blogs():
     if page<1:
         page=1
     offset=(page-1)*50
-    blogs=execute_db("""
+    blogs=query_db("""
         SELECT b.*, u.username, u.display_name
         FROM blogs b
         JOIN users u ON b.user_id = u.id
         ORDER BY b.created_at DESC
         LIMIT 50 OFFSET ?
     """,(offset,))
-    total_blogs=execute_db("SELECT COUNT(*) as count FROM blogs",one=True).fetchone()["count"]
+    total_blogs=query_db("SELECT COUNT(*) as count FROM blogs",one=True)["count"]
     total_pages=(total_blogs+49)//50
     return render_template("admin/blogs.html",user=user,blogs=blogs,current_page=page,total_pages=total_pages,total_blogs=total_blogs)
 
@@ -500,7 +500,7 @@ def admin_comments():
         ORDER BY c.created_at DESC
         LIMIT 50 OFFSET ?
     """,(offset,))
-    total_comments=execute_db("SELECT COUNT(*) as count FROM comments",one=True).fetchone()["count"]
+    total_comments=query_db("SELECT COUNT(*) as count FROM comments",one=True)["count"]
     total_pages=(total_comments+49)//50
     return render_template("admin/comments.html",user=user,comments=comments,current_page=page,total_pages=total_pages,total_comments=total_comments)
 
@@ -521,12 +521,11 @@ def admin_demote_user(user_id):
 @app.route("/admin/delete-user/<user_id>",methods=["POST"])
 @require_admin
 def admin_delete_user(user_id):
-    user=get_current_user(request)
-    target_user=execute_db("SELECT role FROM users WHERE id=?",(user_id,),one=True).fetchone()
+    target_user=query_db("SELECT role FROM users WHERE id=?",(user_id,),one=True)
     if not target_user:
         return jsonify({"success":False,"error":"User not found"}),404
     if target_user["role"]=="admin":
-        admin_count=execute_db("SELECT COUNT(*) as count FROM users WHERE role='admin'",one=True).fetchone()["count"]
+        admin_count=query_db("SELECT COUNT(*) as count FROM users WHERE role='admin'",one=True)["count"]
         if admin_count<=1:
             return jsonify({"success":False,"error":"Cannot delete the last admin"}),400
     try:
@@ -538,8 +537,7 @@ def admin_delete_user(user_id):
 @app.route("/admin/delete-blog/<blog_id>",methods=["POST"])
 @require_admin
 def admin_delete_blog(blog_id):
-    user=get_current_user(request)
-    blog=execute_db("SELECT id FROM blogs WHERE id=?",(blog_id,),one=True).fetchone()
+    blog=query_db("SELECT id FROM blogs WHERE id=?",(blog_id,),one=True)
     if not blog:
         return jsonify({"success":False,"error":"Blog not found"}),404
     try:
@@ -551,8 +549,7 @@ def admin_delete_blog(blog_id):
 @app.route("/admin/delete-comment/<comment_id>",methods=["POST"])
 @require_admin
 def admin_delete_comment(comment_id):
-    user=get_current_user(request)
-    comment=execute_db("SELECT id FROM comments WHERE id=?",(comment_id,),one=True).fetchone()
+    comment=query_db("SELECT id FROM comments WHERE id=?",(comment_id,),one=True)
     if not comment:
         return jsonify({"success":False,"error":"Comment not found"}),404
     try:
