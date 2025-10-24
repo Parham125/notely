@@ -497,7 +497,7 @@ def admin_comments():
     if page<1:
         page=1
     offset=(page-1)*50
-    comments=execute_db("""
+    comments=query_db("""
         SELECT c.*, u.username, u.display_name, b.title as blog_title
         FROM comments c
         JOIN users u ON c.user_id = u.id
