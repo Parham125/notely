@@ -86,7 +86,6 @@ def init_db():
                 display_name TEXT NOT NULL,
                 password_hash TEXT NOT NULL,
                 profile_picture TEXT,
-                role TEXT DEFAULT 'user',
                 created_at INTEGER NOT NULL
             )
         """)
