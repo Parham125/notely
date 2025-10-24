@@ -10,6 +10,6 @@ def generate_avatar_svg(username,display_name):
     return svg
 
 def get_avatar_url(user):
-    if user.get("profile_picture"):
+    if hasattr(user, 'profile_picture') and user["profile_picture"]:
         return f"/uploads/{user['profile_picture']}"
     return f"data:image/svg+xml,{generate_avatar_svg(user['username'],user['display_name']).replace('#','%23').replace('<','%3C').replace('>','%3E').replace('\"','%22')}"

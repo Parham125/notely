@@ -480,8 +480,8 @@ def admin_blogs():
         JOIN users u ON b.user_id = u.id
         ORDER BY b.created_at DESC
         LIMIT 50 OFFSET ?
-    """,(offset,)).fetchall()
-    total_blogs=execute_db("SELECT COUNT(*) as count FROM blogs",one=True)["count"]
+    """,(offset,))
+    total_blogs=execute_db("SELECT COUNT(*) as count FROM blogs",one=True).fetchone()["count"]
     total_pages=(total_blogs+49)//50
     return render_template("admin/blogs.html",user=user,blogs=blogs,current_page=page,total_pages=total_pages,total_blogs=total_blogs)
 
@@ -500,8 +500,8 @@ def admin_comments():
         JOIN blogs b ON c.blog_id = b.id
         ORDER BY c.created_at DESC
         LIMIT 50 OFFSET ?
-    """,(offset,)).fetchall()
-    total_comments=execute_db("SELECT COUNT(*) as count FROM comments",one=True)["count"]
+    """,(offset,))
+    total_comments=execute_db("SELECT COUNT(*) as count FROM comments",one=True).fetchone()["count"]
     total_pages=(total_comments+49)//50
     return render_template("admin/comments.html",user=user,comments=comments,current_page=page,total_pages=total_pages,total_comments=total_comments)
 
@@ -523,11 +523,11 @@ def admin_demote_user(user_id):
 @require_admin
 def admin_delete_user(user_id):
     user=get_current_user(request)
-    target_user=execute_db("SELECT role FROM users WHERE id=?",(user_id,),one=True)
+    target_user=execute_db("SELECT role FROM users WHERE id=?",(user_id,),one=True).fetchone()
     if not target_user:
         return jsonify({"success":False,"error":"User not found"}),404
     if target_user["role"]=="admin":
-        admin_count=execute_db("SELECT COUNT(*) as count FROM users WHERE role='admin'",one=True)["count"]
+        admin_count=execute_db("SELECT COUNT(*) as count FROM users WHERE role='admin'",one=True).fetchone()["count"]
         if admin_count<=1:
             return jsonify({"success":False,"error":"Cannot delete the last admin"}),400
     try:
@@ -540,7 +540,7 @@ def admin_delete_user(user_id):
 @require_admin
 def admin_delete_blog(blog_id):
     user=get_current_user(request)
-    blog=execute_db("SELECT id FROM blogs WHERE id=?",(blog_id,),one=True)
+    blog=execute_db("SELECT id FROM blogs WHERE id=?",(blog_id,),one=True).fetchone()
     if not blog:
         return jsonify({"success":False,"error":"Blog not found"}),404
     try:
@@ -553,7 +553,7 @@ def admin_delete_blog(blog_id):
 @require_admin
 def admin_delete_comment(comment_id):
     user=get_current_user(request)
-    comment=execute_db("SELECT id FROM comments WHERE id=?",(comment_id,),one=True)
+    comment=execute_db("SELECT id FROM comments WHERE id=?",(comment_id,),one=True).fetchone()
     if not comment:
         return jsonify({"success":False,"error":"Comment not found"}),404
     try:
