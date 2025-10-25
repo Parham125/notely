@@ -475,39 +475,96 @@ def admin_users():
 def admin_blogs():
     user=get_current_user(request)
     page=request.args.get("page",1,type=int)
+    search=request.args.get("search","").strip()
+    sort=request.args.get("sort","created_at")
+    order=request.args.get("order","desc")
     if page<1:
         page=1
     offset=(page-1)*50
-    blogs=query_db("""
-        SELECT b.*, u.username, u.display_name
-        FROM blogs b
-        JOIN users u ON b.user_id = u.id
-        ORDER BY b.created_at DESC
-        LIMIT 50 OFFSET ?
-    """,(offset,))
-    total_blogs=query_db("SELECT COUNT(*) as count FROM blogs",one=True)["count"]
+    if sort not in ["title","username","created_at","updated_at"]:
+        sort="created_at"
+    if order not in ["asc","desc"]:
+        order="desc"
+    order_column=f"b.{sort}"
+    if sort=="username":
+        order_column="u.username"
+    if search:
+        blogs=query_db(f"""
+            SELECT b.*, u.username, u.display_name
+            FROM blogs b
+            JOIN users u ON b.user_id = u.id
+            WHERE b.title LIKE ? OR u.username LIKE ? OR u.display_name LIKE ?
+            ORDER BY {order_column} {order}
+            LIMIT 50 OFFSET ?
+        """,(f"%{search}%",f"%{search}%",f"%{search}%",offset))
+        total_blogs=query_db("""
+            SELECT COUNT(*) as count
+            FROM blogs b
+            JOIN users u ON b.user_id = u.id
+            WHERE b.title LIKE ? OR u.username LIKE ? OR u.display_name LIKE ?
+        """,(f"%{search}%",f"%{search}%",f"%{search}%"),one=True)["count"]
+    else:
+        blogs=query_db(f"""
+            SELECT b.*, u.username, u.display_name
+            FROM blogs b
+            JOIN users u ON b.user_id = u.id
+            ORDER BY {order_column} {order}
+            LIMIT 50 OFFSET ?
+        """,(offset,))
+        total_blogs=query_db("SELECT COUNT(*) as count FROM blogs",one=True)["count"]
     total_pages=(total_blogs+49)//50
-    return render_template("admin/blogs.html",user=user,blogs=blogs,current_page=page,total_pages=total_pages,total_blogs=total_blogs)
+    return render_template("admin/blogs.html",user=user,blogs=blogs,current_page=page,search=search,total_pages=total_pages,total_blogs=total_blogs,sort=sort,order=order)
 
 @app.route("/admin/comments")
 @require_admin
 def admin_comments():
     user=get_current_user(request)
     page=request.args.get("page",1,type=int)
+    search=request.args.get("search","").strip()
+    sort=request.args.get("sort","created_at")
+    order=request.args.get("order","desc")
     if page<1:
         page=1
     offset=(page-1)*50
-    comments=query_db("""
-        SELECT c.*, u.username, u.display_name, b.title as blog_title
-        FROM comments c
-        JOIN users u ON c.user_id = u.id
-        JOIN blogs b ON c.blog_id = b.id
-        ORDER BY c.created_at DESC
-        LIMIT 50 OFFSET ?
-    """,(offset,))
-    total_comments=query_db("SELECT COUNT(*) as count FROM comments",one=True)["count"]
+    if sort not in ["content","username","created_at","blog_title"]:
+        sort="created_at"
+    if order not in ["asc","desc"]:
+        order="desc"
+    order_column=f"c.{sort}"
+    if sort=="username":
+        order_column="u.username"
+    elif sort=="blog_title":
+        order_column="b.title"
+    if search:
+        comments=query_db(f"""
+            SELECT c.*, u.username, u.display_name, b.title as blog_title
+            FROM comments c
+            JOIN users u ON c.user_id = u.id
+            JOIN blogs b ON c.blog_id = b.id
+            WHERE c.content LIKE ? OR u.username LIKE ? OR u.display_name LIKE ? OR b.title LIKE ?
+            ORDER BY {order_column} {order}
+            LIMIT 50 OFFSET ?
+        """,(f"%{search}%",f"%{search}%",f"%{search}%",f"%{search}%",offset))
+        total_comments=query_db("""
+            SELECT COUNT(*) as count
+            FROM comments c
+            JOIN users u ON c.user_id = u.id
+            JOIN blogs b ON c.blog_id = b.id
+            WHERE c.content LIKE ? OR u.username LIKE ? OR u.display_name LIKE ? OR b.title LIKE ?
+        """,(f"%{search}%",f"%{search}%",f"%{search}%",f"%{search}%"),one=True)["count"]
+    else:
+        comments=query_db(f"""
+            SELECT c.*, u.username, u.display_name, b.title as blog_title
+            FROM comments c
+            JOIN users u ON c.user_id = u.id
+            JOIN blogs b ON c.blog_id = b.id
+            ORDER BY {order_column} {order}
+            LIMIT 50 OFFSET ?
+        """,(offset,))
+        total_comments=query_db("SELECT COUNT(*) as count FROM comments",one=True)["count"]
+    total_blogs=query_db("SELECT COUNT(*) as count FROM blogs",one=True)["count"]
     total_pages=(total_comments+49)//50
-    return render_template("admin/comments.html",user=user,comments=comments,current_page=page,total_pages=total_pages,total_comments=total_comments)
+    return render_template("admin/comments.html",user=user,comments=comments,current_page=page,search=search,total_pages=total_pages,total_comments=total_comments,total_blogs=total_blogs,sort=sort,order=order)
 
 @app.route("/admin/promote/<user_id>",methods=["POST"])
 @require_admin

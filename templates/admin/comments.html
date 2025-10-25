@@ -28,15 +28,32 @@
 </div>
 </div>
 </div>
+
+<div class="admin-controls" style="margin-bottom:24px;">
+<div class="info-card" style="padding:16px;">
+<form method="GET" class="search-form" style="background:transparent;border:none;padding:0;">
+<div class="search-form-container" style="display:flex;align-items:center;width:100%;">
+<span style="color:var(--text-secondary);font-weight:500;margin-right:12px;">🔍</span>
+<input type="text" name="search" value="{{search}}" placeholder="Search comments by content or author..." class="search-input" style="min-width:300px;flex:1;">
+<div style="display:flex;gap:8px;margin-left:12px;">
+<button type="submit" class="btn">Search</button>
+{% if search %}
+<a href="/admin/comments" class="btn btn-secondary">Clear</a>
+{% endif %}
+</div>
+</div>
+</form>
+</div>
+</div>
 {% if comments %}
 <div class="admin-table-container">
 <table class="admin-table">
 <thead>
 <tr>
-<th>Comment</th>
-<th>Author</th>
-<th>Blog Post</th>
-<th>Created</th>
+<th><a href="/admin/comments?sort=content&order={{'asc' if sort == 'content' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Comment {{'↓' if sort == 'content' and order == 'desc' else '↑' if sort == 'content' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/comments?sort=username&order={{'asc' if sort == 'username' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Author {{'↓' if sort == 'username' and order == 'desc' else '↑' if sort == 'username' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/comments?sort=blog_title&order={{'asc' if sort == 'blog_title' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Blog Post {{'↓' if sort == 'blog_title' and order == 'desc' else '↑' if sort == 'blog_title' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/comments?sort=created_at&order={{'asc' if sort == 'created_at' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Created {{'↓' if sort == 'created_at' and order == 'desc' else '↑' if sort == 'created_at' and order == 'asc' else ''}}</a></th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -66,16 +83,20 @@
 </div>
 <div class="pagination" style="text-align:center;margin-top:30px;">
 {% if current_page>1 %}
-<a href="/admin/comments?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+<a href="/admin/comments?page={{current_page-1}}{{'&search=' + search if search else ''}}{{'&sort=' + sort if sort else ''}}{{'&order=' + order if order else ''}}" class="btn btn-secondary btn-small">← Previous</a>
 {% endif %}
 <span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
 {% if current_page<total_pages %}
-<a href="/admin/comments?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+<a href="/admin/comments?page={{current_page+1}}{{'&search=' + search if search else ''}}{{'&sort=' + sort if sort else ''}}{{'&order=' + order if order else ''}}" class="btn btn-secondary btn-small">Next →</a>
 {% endif %}
 </div>
 {% else %}
 <div class="admin-empty">
+{% if search %}
+<p>No comments found matching "{{search}}".</p>
+{% else %}
 <p>No comments found.</p>
+{% endif %}
 </div>
 {% endif %}
 

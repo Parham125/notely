@@ -26,16 +26,33 @@
 </div>
 </div>
 </div>
+
+<div class="admin-controls" style="margin-bottom:24px;">
+<div class="info-card" style="padding:16px;">
+<form method="GET" class="search-form" style="background:transparent;border:none;padding:0;">
+<div class="search-form-container" style="display:flex;align-items:center;width:100%;">
+<span style="color:var(--text-secondary);font-weight:500;margin-right:12px;">🔍</span>
+<input type="text" name="search" value="{{search}}" placeholder="Search blogs by title or author..." class="search-input" style="min-width:300px;flex:1;">
+<div style="display:flex;gap:8px;margin-left:12px;">
+<button type="submit" class="btn">Search</button>
+{% if search %}
+<a href="/admin/blogs" class="btn btn-secondary">Clear</a>
+{% endif %}
+</div>
+</div>
+</form>
+</div>
+</div>
 {% if blogs %}
 <div class="admin-table-container">
 <table class="admin-table">
 <thead>
 <tr>
-<th>Title</th>
-<th>Author</th>
+<th><a href="/admin/blogs?sort=title&order={{'asc' if sort == 'title' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Title {{'↓' if sort == 'title' and order == 'desc' else '↑' if sort == 'title' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/blogs?sort=username&order={{'asc' if sort == 'username' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Author {{'↓' if sort == 'username' and order == 'desc' else '↑' if sort == 'username' and order == 'asc' else ''}}</a></th>
 <th>Status</th>
-<th>Created</th>
-<th>Updated</th>
+<th><a href="/admin/blogs?sort=created_at&order={{'asc' if sort == 'created_at' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Created {{'↓' if sort == 'created_at' and order == 'desc' else '↑' if sort == 'created_at' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/blogs?sort=updated_at&order={{'asc' if sort == 'updated_at' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Updated {{'↓' if sort == 'updated_at' and order == 'desc' else '↑' if sort == 'updated_at' and order == 'asc' else ''}}</a></th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -70,16 +87,20 @@
 </div>
 <div class="pagination" style="text-align:center;margin-top:30px;">
 {% if current_page>1 %}
-<a href="/admin/blogs?page={{current_page-1}}" class="btn btn-secondary btn-small">← Previous</a>
+<a href="/admin/blogs?page={{current_page-1}}{{'&search=' + search if search else ''}}{{'&sort=' + sort if sort else ''}}{{'&order=' + order if order else ''}}" class="btn btn-secondary btn-small">← Previous</a>
 {% endif %}
 <span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
 {% if current_page<total_pages %}
-<a href="/admin/blogs?page={{current_page+1}}" class="btn btn-secondary btn-small">Next →</a>
+<a href="/admin/blogs?page={{current_page+1}}{{'&search=' + search if search else ''}}{{'&sort=' + sort if sort else ''}}{{'&order=' + order if order else ''}}" class="btn btn-secondary btn-small">Next →</a>
 {% endif %}
 </div>
 {% else %}
 <div class="admin-empty">
+{% if search %}
+<p>No blogs found matching "{{search}}".</p>
+{% else %}
 <p>No blogs found.</p>
+{% endif %}
 </div>
 {% endif %}
 
