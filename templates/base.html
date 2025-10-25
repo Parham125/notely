@@ -19,7 +19,8 @@
 <header>
 <div class="container header-content">
 <a href="/" class="logo">Notely</a>
-<nav>
+<button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+<nav class="desktop-nav">
 {% if user %}
 <a href="/">Home</a>
 <a href="/search">Search</a>
@@ -27,7 +28,7 @@
 <a href="/profile/{{user.username}}">Profile</a>
 <a href="/settings">Settings</a>
 {% if user.role == 'admin' %}
-<a href="/admin" style="color:var(--accent-color);">Admin</a>
+<a href="/admin" style="color:var(--primary);font-weight:600;">Admin</a>
 {% endif %}
 <a href="/logout">Logout</a>
 {% else %}
@@ -40,6 +41,37 @@
 </nav>
 </div>
 </header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+<div class="mobile-menu-content">
+<div class="mobile-menu-header">
+<h2 style="margin:0;color:var(--primary);">🚀 Navigation</h2>
+<button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+</div>
+<nav class="mobile-menu-nav">
+{% if user %}
+<a href="/" onclick="toggleMobileMenu()">🏠 Home</a>
+<a href="/search" onclick="toggleMobileMenu()">🔍 Search</a>
+<a href="/blog/new" onclick="toggleMobileMenu()">✏️ New Blog</a>
+<a href="/profile/{{user.username}}" onclick="toggleMobileMenu()">👤 Profile</a>
+<a href="/settings" onclick="toggleMobileMenu()">⚙️ Settings</a>
+{% if user.role == 'admin' %}
+<a href="/admin" onclick="toggleMobileMenu()" style="color:var(--primary);font-weight:600;">🎛️ Admin</a>
+{% endif %}
+<a href="/logout" onclick="toggleMobileMenu()">🚪 Logout</a>
+{% else %}
+<a href="/" onclick="toggleMobileMenu()">🏠 Home</a>
+<a href="/search" onclick="toggleMobileMenu()">🔍 Search</a>
+<a href="/signin" onclick="toggleMobileMenu()">🔑 Sign In</a>
+<a href="/signup" onclick="toggleMobileMenu()">📝 Sign Up</a>
+{% endif %}
+<div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+<button id="mobile-theme-toggle" class="theme-toggle" style="width:100%;" onclick="toggleTheme();toggleMobileMenu()">🌙 Toggle Theme</button>
+</div>
+</nav>
+</div>
+</div>
 <main class="container">
 {% block content %}{% endblock %}
 </main>

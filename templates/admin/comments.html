@@ -2,16 +2,31 @@
 {% block title %}Comment Management - Admin - Notely{% endblock %}
 {% block content %}
 <div class="admin-header">
-<h1>Comment Management</h1>
+<h1>💬 Comment Management</h1>
 <div class="admin-nav">
-<a href="/admin" class="admin-nav-link">Dashboard</a>
-<a href="/admin/users" class="admin-nav-link">Users</a>
-<a href="/admin/blogs" class="admin-nav-link">Blogs</a>
-<a href="/admin/comments" class="admin-nav-link active">Comments</a>
+<a href="/admin" class="admin-nav-link">📊 Dashboard</a>
+<a href="/admin/users" class="admin-nav-link">👥 Users</a>
+<a href="/admin/blogs" class="admin-nav-link">📝 Blogs</a>
+<a href="/admin/comments" class="admin-nav-link active">💬 Comments</a>
 </div>
 </div>
-<div class="admin-info" style="margin-bottom:20px;">
-<p><strong>Total Comments:</strong> {{total_comments}} • Showing page {{current_page}}</p>
+
+<div class="admin-info" style="margin-bottom:24px;">
+<div class="info-card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+<div>
+<h3 style="margin:0;color:var(--primary);font-size:18px;">💭 Comment Statistics</h3>
+<p style="margin:8px 0 0 0;color:var(--text);"><strong>Total Comments:</strong> {{total_comments}} • Showing page {{current_page}} of {{total_pages}}</p>
+</div>
+<div>
+{% if total_comments > 0 %}
+<div style="display:flex;gap:12px;align-items:center;">
+<span style="color:var(--text-secondary);font-size:14px;">📊 Avg per blog: {{ "%.1f"|format(total_comments / total_blogs) if total_blogs > 0 else "0" }}</span>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
 </div>
 {% if comments %}
 <div class="admin-table-container">

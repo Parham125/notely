@@ -2,25 +2,39 @@
 {% block title %}User Management - Admin - Notely{% endblock %}
 {% block content %}
 <div class="admin-header">
-<h1>User Management</h1>
+<h1>👥 User Management</h1>
 <div class="admin-nav">
-<a href="/admin" class="admin-nav-link">Dashboard</a>
-<a href="/admin/users" class="admin-nav-link active">Users</a>
-<a href="/admin/blogs" class="admin-nav-link">Blogs</a>
-<a href="/admin/comments" class="admin-nav-link">Comments</a>
+<a href="/admin" class="admin-nav-link">📊 Dashboard</a>
+<a href="/admin/users" class="admin-nav-link active">👥 Users</a>
+<a href="/admin/blogs" class="admin-nav-link">📝 Blogs</a>
+<a href="/admin/comments" class="admin-nav-link">💬 Comments</a>
 </div>
 </div>
-<div class="admin-info" style="margin-bottom:20px;">
-<p><strong>Total Users:</strong> {{total_users}} • Showing page {{current_page}} of {{total_pages}}</p>
+
+<div class="admin-info" style="margin-bottom:24px;">
+<div class="info-card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+<div>
+<h3 style="margin:0;color:var(--primary);font-size:18px;">👤 User Statistics</h3>
+<p style="margin:8px 0 0 0;color:var(--text);"><strong>Total Users:</strong> {{total_users}} • Showing page {{current_page}} of {{total_pages}}</p>
 </div>
-<div class="admin-controls" style="margin-bottom:20px;">
-<form method="GET" class="search-form">
-<input type="text" name="search" value="{{search}}" placeholder="Search users by username or display name..." class="search-input">
-<button type="submit" class="btn btn-primary">Search</button>
+</div>
+</div>
+</div>
+
+<div class="admin-controls" style="margin-bottom:24px;">
+<div class="info-card" style="padding:16px;">
+<form method="GET" class="search-form" style="background:transparent;border:none;padding:0;">
+<div style="display:flex;align-items:center;gap:12px;">
+<span style="color:var(--text-secondary);font-weight:500;">🔍</span>
+<input type="text" name="search" value="{{search}}" placeholder="Search users by username or display name..." class="search-input" style="min-width:350px;">
+<button type="submit" class="btn">Search</button>
 {% if search %}
 <a href="/admin/users" class="btn btn-secondary">Clear</a>
 {% endif %}
+</div>
 </form>
+</div>
 </div>
 {% if users %}
 <div class="admin-table-container">

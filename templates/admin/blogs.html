@@ -2,16 +2,29 @@
 {% block title %}Blog Management - Admin - Notely{% endblock %}
 {% block content %}
 <div class="admin-header">
-<h1>Blog Management</h1>
+<h1>📝 Blog Management</h1>
 <div class="admin-nav">
-<a href="/admin" class="admin-nav-link">Dashboard</a>
-<a href="/admin/users" class="admin-nav-link">Users</a>
-<a href="/admin/blogs" class="admin-nav-link active">Blogs</a>
-<a href="/admin/comments" class="admin-nav-link">Comments</a>
+<a href="/admin" class="admin-nav-link">📊 Dashboard</a>
+<a href="/admin/users" class="admin-nav-link">👥 Users</a>
+<a href="/admin/blogs" class="admin-nav-link active">📝 Blogs</a>
+<a href="/admin/comments" class="admin-nav-link">💬 Comments</a>
 </div>
 </div>
-<div class="admin-info" style="margin-bottom:20px;">
-<p><strong>Total Blogs:</strong> {{total_blogs}} • Showing page {{current_page}}</p>
+
+<div class="admin-info" style="margin-bottom:24px;">
+<div class="info-card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+<div>
+<h3 style="margin:0;color:var(--primary);font-size:18px;">📊 Blog Statistics</h3>
+<p style="margin:8px 0 0 0;color:var(--text);"><strong>Total Blogs:</strong> {{total_blogs}} • Showing page {{current_page}} of {{total_pages}}</p>
+</div>
+<div>
+<a href="/blog/new" class="btn btn-success" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+➕ New Blog
+</a>
+</div>
+</div>
+</div>
 </div>
 {% if blogs %}
 <div class="admin-table-container">
