@@ -223,7 +223,7 @@ nav.desktop-nav{display:none;}
 .search-input::placeholder{color:var(--text-secondary);}
 .search-form-mobile{display:flex;flex-direction:column;gap:8px;}
 .search-form-container{display:flex;align-items:center;width:100%;}
-.search-form-container .search-input{flex:1;}
+.search-form-container input[name="search"]{flex:1;min-width:0;width:100%;}
 @media(max-width:768px){
 .search-form{flex-direction:column;gap:8px;}
 .search-input{min-width:100%;max-width:100%;width:100%;}
