@@ -460,15 +460,31 @@ def admin_users():
     user=get_current_user(request)
     page=request.args.get("page",1,type=int)
     search=request.args.get("search","").strip()
+    sort=request.args.get("sort","created_at")
+    order=request.args.get("order","desc")
     if page<1:
         page=1
-    users=get_all_users(limit=50,offset=(page-1)*50,search=search)
+    if sort not in ["username","display_name","role","created_at"]:
+        sort="created_at"
+    if order not in ["asc","desc"]:
+        order="desc"
     if search:
+        users=query_db(f"""
+            SELECT * FROM users
+            WHERE username LIKE ? OR display_name LIKE ?
+            ORDER BY {sort} {order}
+            LIMIT 50 OFFSET ?
+        """,(f"%{search}%",f"%{search}%",(page-1)*50))
         total_users=query_db("SELECT COUNT(*) as count FROM users WHERE username LIKE ? OR display_name LIKE ?",(f"%{search}%",f"%{search}%"),one=True)["count"]
     else:
+        users=query_db(f"""
+            SELECT * FROM users
+            ORDER BY {sort} {order}
+            LIMIT 50 OFFSET ?
+        """,((page-1)*50,))
         total_users=query_db("SELECT COUNT(*) as count FROM users",one=True)["count"]
     total_pages=(total_users+49)//50
-    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search,total_users=total_users,total_pages=total_pages)
+    return render_template("admin/users.html",user=user,users=users,current_page=page,search=search,total_users=total_users,total_pages=total_pages,sort=sort,order=order)
 
 @app.route("/admin/blogs")
 @require_admin

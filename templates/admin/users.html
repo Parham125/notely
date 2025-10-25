@@ -44,10 +44,10 @@
 <thead>
 <tr>
 <th>Avatar</th>
-<th>Username</th>
-<th>Display Name</th>
-<th>Role</th>
-<th>Created</th>
+<th><a href="/admin/users?sort=username&order={{'asc' if sort == 'username' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Username {{'↓' if sort == 'username' and order == 'desc' else '↑' if sort == 'username' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/users?sort=display_name&order={{'asc' if sort == 'display_name' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Display Name {{'↓' if sort == 'display_name' and order == 'desc' else '↑' if sort == 'display_name' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/users?sort=role&order={{'asc' if sort == 'role' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Role {{'↓' if sort == 'role' and order == 'desc' else '↑' if sort == 'role' and order == 'asc' else ''}}</a></th>
+<th><a href="/admin/users?sort=created_at&order={{'asc' if sort == 'created_at' and order == 'desc' else 'desc'}}{{'&search=' + search if search else ''}}" style="color:var(--text);text-decoration:none;">Created {{'↓' if sort == 'created_at' and order == 'desc' else '↑' if sort == 'created_at' and order == 'asc' else ''}}</a></th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -78,11 +78,11 @@
 </div>
 <div class="pagination" style="text-align:center;margin-top:30px;">
 {% if current_page>1 %}
-<a href="/admin/users?page={{current_page-1}}&search={{search}}" class="btn btn-secondary btn-small">← Previous</a>
+<a href="/admin/users?page={{current_page-1}}{{'&search=' + search if search else ''}}{{'&sort=' + sort if sort else ''}}{{'&order=' + order if order else ''}}" class="btn btn-secondary btn-small">← Previous</a>
 {% endif %}
 <span style="color:var(--text-secondary);margin:0 10px;">Page {{current_page}} of {{total_pages}}</span>
 {% if current_page<total_pages %}
-<a href="/admin/users?page={{current_page+1}}&search={{search}}" class="btn btn-secondary btn-small">Next →</a>
+<a href="/admin/users?page={{current_page+1}}{{'&search=' + search if search else ''}}{{'&sort=' + sort if sort else ''}}{{'&order=' + order if order else ''}}" class="btn btn-secondary btn-small">Next →</a>
 {% endif %}
 </div>
 {% else %}
