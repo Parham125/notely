@@ -222,6 +222,8 @@ nav.desktop-nav{display:none;}
 .search-input{min-width:200px;max-width:100%;border:none;background:transparent;padding:8px 12px;font-size:15px;outline:none;flex:1;}
 .search-input::placeholder{color:var(--text-secondary);}
 .search-form-mobile{display:flex;flex-direction:column;gap:8px;}
+.search-form-container{display:flex;align-items:center;width:100%;}
+.search-form-container .search-input{flex:1;}
 @media(max-width:768px){
 .search-form{flex-direction:column;gap:8px;}
 .search-input{min-width:100%;max-width:100%;width:100%;}
