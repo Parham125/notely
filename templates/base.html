@@ -28,7 +28,7 @@
 <a href="/profile/{{user.username}}">Profile</a>
 <a href="/settings">Settings</a>
 {% if user.role == 'admin' %}
-<a href="/admin" style="color:var(--primary);font-weight:600;">Admin</a>
+<a href="/admin">Admin</a>
 {% endif %}
 <a href="/logout">Logout</a>
 {% else %}
@@ -57,7 +57,7 @@
 <a href="/profile/{{user.username}}" onclick="toggleMobileMenu()">👤 Profile</a>
 <a href="/settings" onclick="toggleMobileMenu()">⚙️ Settings</a>
 {% if user.role == 'admin' %}
-<a href="/admin" onclick="toggleMobileMenu()" style="color:var(--primary);font-weight:600;">🎛️ Admin</a>
+<a href="/admin" onclick="toggleMobileMenu()">🎛️ Admin</a>
 {% endif %}
 <a href="/logout" onclick="toggleMobileMenu()">🚪 Logout</a>
 {% else %}
